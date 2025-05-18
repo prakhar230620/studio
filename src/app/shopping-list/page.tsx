@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ListFilter, Recycle, Replace, Printer, Share2, CheckCircle } from 'lucide-react'; // Added CheckCircle
+import { PlusCircle, Trash2, ListFilter, Recycle, Replace, Printer, Share2, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -324,7 +324,7 @@ export default function ShoppingListPage() {
     toast({ 
         title: "All Shopping Data Cleared", 
         description: "Your entire shopping list history is now empty.",
-        action: <Recycle className="text-destructive" /> // Or Trash2
+        action: <Recycle className="text-destructive" />
     });
   };
 
@@ -402,7 +402,7 @@ export default function ShoppingListPage() {
      return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold text-primary">My Shopping List</h1>
-        <Card className="w-full max-w-2xl mx-auto shadow-md recipe-filter-card"><CardContent className="p-6"><Skeleton className="h-10 w-full" /></CardContent></Card>
+        <Card className="w-full max-w-2xl mx-auto shadow-md recipe-filter-card hover:shadow-lg transition-shadow duration-300 ease-in-out"><CardContent className="p-6"><Skeleton className="h-10 w-full" /></CardContent></Card>
         <div className="bg-muted h-64 rounded-lg animate-pulse max-w-2xl mx-auto"></div>
       </div>
     );
@@ -410,7 +410,7 @@ export default function ShoppingListPage() {
 
   return (
     <div className="space-y-8">
-      <Card className="w-full max-w-2xl mx-auto shadow-md recipe-filter-card">
+      <Card className="w-full max-w-2xl mx-auto shadow-md recipe-filter-card hover:shadow-lg transition-shadow duration-300 ease-in-out">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-center text-primary flex items-center justify-center gap-2">
             <ListFilter className="h-5 w-5" /> Filter Recipes for Shopping List
@@ -432,7 +432,7 @@ export default function ShoppingListPage() {
         </CardContent>
       </Card>
 
-      <Card className="w-full max-w-2xl mx-auto shadow-md manual-add-item-card">
+      <Card className="w-full max-w-2xl mx-auto shadow-md manual-add-item-card hover:shadow-lg transition-shadow duration-300 ease-in-out">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-center">Add Item Manually</CardTitle>
         </CardHeader>
@@ -483,7 +483,7 @@ export default function ShoppingListPage() {
       </Card>
       
       {displayedListItems.length > 0 && (
-        <Card className="w-full max-w-2xl mx-auto shadow-md shopping-list-page-actions-card">
+        <Card className="w-full max-w-2xl mx-auto shadow-md shopping-list-page-actions-card hover:shadow-lg transition-shadow duration-300 ease-in-out">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">List Actions</CardTitle>
           </CardHeader>
@@ -507,6 +507,7 @@ export default function ShoppingListPage() {
         onClearChecked={handleClearCheckedAggregatedItems} 
         onClearAll={handleClearAllAggregatedItemsFromView}
         onToggleUnit={handleToggleUnit}
+        className="hover:shadow-xl transition-shadow duration-300 ease-in-out"
       />
 
       {allShoppingListItems.length > 0 && (

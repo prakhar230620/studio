@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
 
 interface AggregatedShoppingListItem {
   key: string; 
@@ -37,6 +38,7 @@ interface ShoppingListDisplayProps {
   onClearChecked: () => void;
   onClearAll: () => void;
   onToggleUnit: (itemKey: string) => void; 
+  className?: string;
 }
 
 const specialUnits = ['to taste', 'as needed', 'optional', 'special'];
@@ -47,7 +49,8 @@ export function ShoppingListDisplay({
   onRemoveItem, 
   onClearChecked, 
   onClearAll,
-  onToggleUnit 
+  onToggleUnit,
+  className
 }: ShoppingListDisplayProps) {
 
   if (items.length === 0) {
@@ -72,7 +75,7 @@ export function ShoppingListDisplay({
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-lg shopping-list-display-card">
+    <Card className={cn("w-full max-w-2xl mx-auto shadow-lg shopping-list-display-card", className)}>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-2xl text-primary font-bold">Aggregated Shopping List</CardTitle>
       </CardHeader>
@@ -93,7 +96,7 @@ export function ShoppingListDisplay({
                 <label htmlFor={`item-${item.key}`} className={`flex-grow cursor-pointer ${item.checked ? 'line-through' : ''}`}>
                   <span className="font-medium">{item.name}</span>
                   <span className="text-sm ml-1 text-muted-foreground">
-                    { specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0
+                    { specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0 && item.unit !== ''
                       ? `(${item.unit})`
                       : `(${item.totalQuantity % 1 === 0 ? item.totalQuantity : item.totalQuantity.toFixed(2)} ${item.unit || 'unit(s)'})`
                     }
