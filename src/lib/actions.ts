@@ -236,7 +236,7 @@ export async function handleGenerateRecipeAction(input: GenerateRecipeInput): Pr
       instructions: aiResponse.instructions,
       servings: baseServings,
       baseServings: baseServings,
-      imageUrl: `https://placehold.co/600x400.png`,
+      imageUrl: aiResponse.imageUrl, // Use the generated image URL
       isFavorite: false,
     };
     return recipe;

@@ -87,7 +87,6 @@ export function RecipeDisplay({ recipe, onAddToShoppingList, onToggleFavorite }:
               alt={recipe.title} 
               layout="fill" 
               objectFit="cover" 
-              data-ai-hint="food photography delicious meal"
               className="transform hover:scale-105 transition-transform duration-300 ease-in-out"
             />
           </div>

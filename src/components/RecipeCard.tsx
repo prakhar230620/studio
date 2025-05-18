@@ -45,7 +45,6 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelectRecipe, showFavor
             alt={recipe.title} 
             layout="fill" 
             objectFit="cover" 
-            data-ai-hint="recipe food"
             className="group-hover:brightness-105 transition-all duration-300"
           />
         </div>
