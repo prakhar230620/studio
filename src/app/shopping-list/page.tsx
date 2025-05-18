@@ -3,20 +3,41 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-// import { useMutation } from '@tanstack/react-query'; // Not needed for prices anymore
 import useLocalStorage from '@/hooks/useLocalStorage';
 import type { ShoppingListItem } from '@/lib/types';
 import { ShoppingListDisplay } from '@/components/ShoppingListDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle } from 'lucide-react'; // Removed RefreshCw, AlertTriangle
+import { Checkbox } from '@/components/ui/checkbox'; // Added Checkbox
+import { Label } from '@/components/ui/label'; // Added Label
+import { PlusCircle, Trash2, ListFilter, Recycle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { handleFetchItemPrices } from '@/lib/actions'; // Removed price action import
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+interface AggregatedShoppingListItem {
+  key: string; // Unique key for React list, e.g., "Flour-gram"
+  name: string;
+  totalQuantity: number;
+  unit: string;
+  checked: boolean;
+  // sourceRecipeTitles: string[]; // For future reference
+}
 
 export default function ShoppingListPage() {
-  const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []);
+  const [allShoppingListItems, setAllShoppingListItems] = useLocalStorage<ShoppingListItem[]>('shoppingList', []);
   
   const [newItemName, setNewItemName] = useState('');
   const [newItemQty, setNewItemQty] = useState('1');
@@ -28,33 +49,102 @@ export default function ShoppingListPage() {
     setIsClient(true);
   }, []);
 
+  const uniqueRecipeTitles = useMemo(() => {
+    const titles = new Set(allShoppingListItems.map(item => item.recipeTitle || "Manually Added"));
+    return Array.from(titles);
+  }, [allShoppingListItems]);
 
-  // Simplified useEffect - no price fetching
+  const [selectedRecipeTitles, setSelectedRecipeTitles] = useState<string[]>([]);
+
+  // Initialize selectedRecipeTitles to all unique titles when component mounts or titles change
   useEffect(() => {
     if (isClient) {
-      // Potentially future logic if shoppingList needs direct manipulation on load
+      setSelectedRecipeTitles(uniqueRecipeTitles);
     }
-  }, [isClient, shoppingList]);
+  }, [uniqueRecipeTitles, isClient]);
 
-  const handleUpdateItem = (updatedItem: ShoppingListItem) => {
-    const newList = shoppingList.map(item => item.id === updatedItem.id ? updatedItem : item);
-    setShoppingList(newList);
-  };
-
-  const handleRemoveItem = (itemId: string) => {
-    setShoppingList(prevList => prevList.filter(item => item.id !== itemId));
-    toast({ title: "Item Removed", description: "The item has been removed from your list." });
+  const handleRecipeTitleSelectionChange = (title: string, isSelected: boolean) => {
+    setSelectedRecipeTitles(prev => 
+      isSelected ? [...prev, title] : prev.filter(t => t !== title)
+    );
   };
   
-  const handleClearChecked = () => {
-    setShoppingList(prevList => prevList.filter(item => !item.checked));
-    toast({ title: "Checked Items Cleared", description: "All checked items have been removed." });
+  const aggregatedShoppingList = useMemo((): AggregatedShoppingListItem[] => {
+    if (!isClient) return [];
+
+    const itemsToConsider = allShoppingListItems.filter(item => 
+      selectedRecipeTitles.includes(item.recipeTitle || "Manually Added")
+    );
+
+    const aggregationMap = new Map<string, AggregatedShoppingListItem>();
+
+    itemsToConsider.forEach(item => {
+      // Normalize units for common items (e.g., tbsp and tablespoon) - basic for now
+      let normalizedUnit = item.unit.toLowerCase().replace(/\.$/, ''); // remove trailing dot
+      if (normalizedUnit === 'tbsp' || normalizedUnit === 'tbs') normalizedUnit = 'tablespoon';
+      if (normalizedUnit === 'tsp' || normalizedUnit === 'tsps') normalizedUnit = 'teaspoon';
+      if (normalizedUnit === 'pcs' || normalizedUnit === 'piece') normalizedUnit = 'pc';
+
+
+      const key = `${item.name.toLowerCase().trim()}-${normalizedUnit}`;
+      
+      if (aggregationMap.has(key)) {
+        const existing = aggregationMap.get(key)!;
+        existing.totalQuantity += item.quantity;
+        // existing.sourceRecipeTitles.push(item.recipeTitle || "Manually Added");
+      } else {
+        aggregationMap.set(key, {
+          key,
+          name: item.name, // Preserve original casing for display from first item
+          totalQuantity: item.quantity,
+          unit: item.unit, // Preserve original casing for unit display
+          checked: false, // Default to unchecked for aggregated items
+          // sourceRecipeTitles: [item.recipeTitle || "Manually Added"],
+        });
+      }
+    });
+    return Array.from(aggregationMap.values()).sort((a,b) => a.name.localeCompare(b.name));
+  }, [allShoppingListItems, selectedRecipeTitles, isClient]);
+
+  // State for managing the checked status and existence of items in the displayed aggregated list
+  const [displayedListItems, setDisplayedListItems] = useState<AggregatedShoppingListItem[]>([]);
+
+  useEffect(() => {
+    setDisplayedListItems(aggregatedShoppingList.map(item => ({...item, checked: false }))); // Reset checked status on aggregation change
+  }, [aggregatedShoppingList]);
+
+
+  const handleUpdateAggregatedItem = (updatedItem: AggregatedShoppingListItem) => {
+    setDisplayedListItems(prevList => 
+      prevList.map(item => item.key === updatedItem.key ? updatedItem : item)
+    );
   };
 
-  const handleClearAll = () => {
-    setShoppingList([]);
-    toast({ title: "List Cleared", description: "Your shopping list is now empty." });
+  const handleRemoveAggregatedItem = (itemKey: string) => {
+    setDisplayedListItems(prevList => prevList.filter(item => item.key !== itemKey));
+    const itemToRemove = displayedListItems.find(i => i.key === itemKey);
+    if (itemToRemove) {
+        toast({ title: "Item Removed from View", description: `${itemToRemove.name} has been removed from the current aggregated list.` });
+    }
   };
+  
+  const handleClearCheckedAggregatedItems = () => {
+    setDisplayedListItems(prevList => prevList.filter(item => !item.checked));
+    toast({ title: "Checked Items Cleared", description: "Checked items removed from current aggregated view." });
+  };
+
+  const handleClearAllAggregatedItemsFromView = () => {
+    setDisplayedListItems([]);
+    toast({ title: "Current List View Cleared", description: "The aggregated list view is now empty." });
+  };
+  
+  const handleClearAllUnderlyingData = () => {
+    setAllShoppingListItems([]); // This clears the local storage
+    setDisplayedListItems([]); // Also clear the view
+    setSelectedRecipeTitles([]); // Reset selections
+    toast({ title: "All Shopping Data Cleared", description: "Your entire shopping list history is now empty." });
+  };
+
 
   const handleAddItemManually = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,15 +163,20 @@ export default function ShoppingListPage() {
       name: newItemName.trim(),
       quantity: quantity,
       unit: newItemUnit.trim(),
-      checked: false,
+      checked: false, // Default for underlying item
       recipeTitle: "Manually Added",
     };
 
-    setShoppingList(prevList => [...prevList, newItem]);
+    setAllShoppingListItems(prevList => [...prevList, newItem]);
+    // If "Manually Added" wasn't selected, select it now
+    if (!selectedRecipeTitles.includes("Manually Added")) {
+        setSelectedRecipeTitles(prev => [...prev, "Manually Added"]);
+    }
+
     setNewItemName('');
     setNewItemQty('1');
     setNewItemUnit('');
-    toast({ title: "Item Added", description: `${newItem.name} has been added to your list.` });
+    toast({ title: "Item Added", description: `${newItem.name} has been added to 'Manually Added' items.` });
   };
 
 
@@ -97,7 +192,27 @@ export default function ShoppingListPage() {
 
   return (
     <div className="space-y-8">
-      {/* Removed price simulation alert */}
+      <Card className="w-full max-w-2xl mx-auto shadow-md">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold text-center text-primary flex items-center justify-center gap-2">
+            <ListFilter className="h-5 w-5" /> Filter Recipes for Shopping List
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {uniqueRecipeTitles.length > 0 ? uniqueRecipeTitles.map(title => (
+            <div key={title} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+              <Checkbox
+                id={`recipe-select-${title.replace(/\s+/g, '-')}`}
+                checked={selectedRecipeTitles.includes(title)}
+                onCheckedChange={(checked) => handleRecipeTitleSelectionChange(title, !!checked)}
+              />
+              <Label htmlFor={`recipe-select-${title.replace(/\s+/g, '-')}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-grow">
+                {title}
+              </Label>
+            </div>
+          )) : <p className="text-sm text-muted-foreground text-center">No recipes added to shopping list yet.</p>}
+        </CardContent>
+      </Card>
 
       <Card className="w-full max-w-2xl mx-auto shadow-md">
         <CardHeader>
@@ -150,14 +265,41 @@ export default function ShoppingListPage() {
       </Card>
       
       <ShoppingListDisplay 
-        items={shoppingList} // Directly pass shoppingList
-        // Removed price-related props
-        onUpdateItem={handleUpdateItem}
-        onRemoveItem={handleRemoveItem}
-        onClearChecked={handleClearChecked}
-        onClearAll={handleClearAll}
-        // Removed onRefreshPrices
+        items={displayedListItems}
+        onUpdateItem={handleUpdateAggregatedItem}
+        onRemoveItem={handleRemoveAggregatedItem} // Remove from current view
+        onClearChecked={handleClearCheckedAggregatedItems} // Clear checked from current view
+        onClearAll={handleClearAllAggregatedItemsFromView} // Clear all from current view
       />
+
+      {allShoppingListItems.length > 0 && (
+        <div className="mt-8 flex justify-center">
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="flex items-center gap-2">
+                        <Recycle className="h-4 w-4" /> Clear All Underlying Shopping Data
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    This action will permanently delete ALL items from your shopping list storage (across all recipes and manually added items). This cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                    onClick={handleClearAllUnderlyingData}
+                    >
+                    Yes, delete all data
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
+      )}
     </div>
   );
 }
+
