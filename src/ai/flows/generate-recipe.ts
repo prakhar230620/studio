@@ -2,9 +2,9 @@
 'use server';
 
 /**
- * @fileOverview Generates a recipe based on a user-provided prompt, including an image.
+ * @fileOverview Generates a recipe based on a user-provided prompt, including an image and servings.
  *
- * - generateRecipe - A function that generates a recipe with an image.
+ * - generateRecipe - A function that generates a recipe with an image and servings.
  * - GenerateRecipeInput - The input type for the generateRecipe function.
  * - GenerateRecipeOutput - The return type for the generateRecipe function.
  */
@@ -13,14 +13,16 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateRecipeInputSchema = z.object({
-  prompt: z.string().describe('A prompt describing the desired recipe.'),
+  prompt: z.string().describe('A prompt describing the desired recipe, potentially including servings, dietary needs, cook time, etc.'),
+  baseServings: z.number().optional().describe('The user-requested number of servings, if provided.'),
 });
 export type GenerateRecipeInput = z.infer<typeof GenerateRecipeInputSchema>;
 
 const RecipeDetailsSchema = z.object({
   title: z.string().describe('The title of the recipe.'),
-  ingredients: z.array(z.string()).describe('A list of ingredients for the recipe.'),
+  ingredients: z.array(z.string()).describe('A list of ingredients for the recipe. Ensure quantities are appropriate for the specified number of servings.'),
   instructions: z.string().describe('The instructions for preparing the recipe.'),
+  servings: z.number().describe('The number of servings this recipe is for. This should match the user-specified servings if provided in the prompt; otherwise, choose a reasonable default (e.g., 2-4).'),
 });
 
 const GenerateRecipeOutputSchema = RecipeDetailsSchema.extend({
@@ -36,7 +38,14 @@ const generateRecipeDetailsPrompt = ai.definePrompt({
   name: 'generateRecipeDetailsPrompt',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: RecipeDetailsSchema},
-  prompt: `You are a recipe generating expert. Generate a recipe based on the following prompt:\n\nPrompt: {{{prompt}}}\n\nFormat the output as a JSON object with 'title', 'ingredients' (as a list of strings), and 'instructions' fields.\n`,
+  prompt: `You are an expert recipe generating AI. Generate a detailed recipe based on the following user preferences and prompt:\n\nUser Preferences & Prompt:\n{{{prompt}}}\n\nCrucially, if the prompt specifies a number of servings, ensure the generated recipe (ingredients and output 'servings' field) adheres to that number. If no servings are specified, default to a reasonable number (e.g., 2 or 4 servings) and reflect this in the 'servings' field of your output.
+The ingredients list should be an array of strings, where each string describes one ingredient (e.g., "1 cup flour", "2 large eggs, beaten").
+The instructions should be a clear, step-by-step guide.
+The title should be appealing and relevant to the recipe.
+
+Format the output strictly as a JSON object with 'title' (string), 'ingredients' (array of strings), 'instructions' (string), and 'servings' (number) fields.
+Example for servings: If the user asks for a recipe for 6 people, the 'servings' field in your JSON output must be 6, and the ingredient quantities should be scaled for 6 people.
+`,
 });
 
 const generateRecipeFlow = ai.defineFlow(
@@ -55,7 +64,7 @@ const generateRecipeFlow = ai.defineFlow(
     // 2. Generate an image for the recipe
     let imageUrl = `https://placehold.co/600x400.png`; // Default placeholder
     try {
-      const imagePrompt = `Generate a photorealistic image of a dish titled: "${recipeDetails.title}". Focus on making it look appetizing.`;
+      const imagePrompt = `Generate a photorealistic, appetizing image of a dish titled: "${recipeDetails.title}". Ensure it looks delicious and well-presented.`;
       const {media} = await ai.generate({
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: imagePrompt,

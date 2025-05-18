@@ -3,8 +3,7 @@
 "use server";
 
 import { generateRecipe, type GenerateRecipeInput, type GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-// import { getItemPrices, type GetItemPricesInput, type GetItemPricesOutput } from '@/ai/flows/get-item-prices-flow.ts'; // Removed
-import type { Recipe, Ingredient, ShoppingListItem } from '@/lib/types';
+import type { Recipe, Ingredient } from '@/lib/types'; // Removed ShoppingListItem as it's not used here
 
 const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | 'quantity' | 'unit' | 'originalQuantity'> => {
   const str = originalStr.toLowerCase().trim();
@@ -13,7 +12,6 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
   let unit: string = '';
   let name: string = originalStr.trim(); // Default to original string, trimmed
 
-  // Handle "to taste", "as needed" or similar, where quantity is not numerical
   if (/(to taste|as needed|for garnish|optional)/i.test(str)) {
     return { name: originalStr.trim(), quantity: 0, unit: "special", originalQuantity: 0 };
   }
@@ -24,11 +22,11 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
     'teaspoons?', 'tsp?s?\\.?', 't\\.?',
     'cups?', 'c\\.?',
     'ounces?', 'oz\\.?',
-    'pounds?', 'lbs?\\.?', 'lb', // lb without s
+    'pounds?', 'lbs?\\.?', 'lb',
     'grams?', 'gm?s?\\.?', 'g\\.?',
     'kilograms?', 'kg\\.?',
     'milliliters?', 'ml\\.?',
-    'liters?', 'l\\.?',
+    'liters?', 'l\\.?', 'L',
     'pinch(?:es)?', 'dash(?:es)?',
     'cloves?', 'cans?', 'packages?', 'pkg\\.?', 'sticks?', 'bunch(?:es)?',
     'heads?', 'slices?', 'pieces?', 'pc?s?\\.?'
@@ -36,20 +34,20 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
   const unitRegexSrc = `\\b(?:${unitsList.join('|')})\\b`;
 
   const parseQuantity = (qtyStr: string | undefined): number => {
-    let q = 1; // Default quantity if parsing fails or qtyStr is undefined
+    let q = 1; 
     if (qtyStr) {
       const trimmedQtyStr = qtyStr.trim();
-      if (trimmedQtyStr.includes('-')) { // Range like "2-3"
+      if (trimmedQtyStr.includes('-')) { 
         const parts = trimmedQtyStr.split('-').map(p => parseFloat(p.trim()));
         if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-          q = (parts[0] + parts[1]) / 2; // Average, or could take first
+          q = (parts[0] + parts[1]) / 2; 
         }
-      } else if (trimmedQtyStr.includes('/')) { // Fraction like "1/2"
+      } else if (trimmedQtyStr.includes('/')) { 
         const parts = trimmedQtyStr.split('/').map(p => parseFloat(p.trim()));
         if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && parts[1] !== 0) {
           q = parts[0] / parts[1];
         }
-      } else { // Decimal or integer
+      } else { 
         const parsed = parseFloat(trimmedQtyStr);
         if (!isNaN(parsed)) q = parsed;
       }
@@ -60,40 +58,38 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
   let processed = false;
 
   // Pattern 1: QTY UNIT NAME (e.g., "2 cups flour", "1/2 tsp salt")
-  // Must have a space after unit before name
-  let pattern = new RegExp(`^(${quantityRegexSrc})\\s*(${unitRegexSrc})\\s+(.+)`, 'i');
-  let match = str.match(pattern);
-  if (match) {
-    quantity = parseQuantity(match[1]);
-    unit = match[2].trim();
-    const preamble = new RegExp(`^${match[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*${match[2].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
+  let pattern1 = new RegExp(`^(${quantityRegexSrc})\\s*(${unitRegexSrc})\\s+(.+)`, 'i');
+  let match1 = str.match(pattern1);
+  if (match1) {
+    quantity = parseQuantity(match1[1]);
+    unit = match1[2].trim().replace(/\.$/, ''); // Remove trailing dot from unit
+    const preamble = new RegExp(`^${match1[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*${match1[2].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
     name = originalStr.trim().replace(preamble, '').trim();
     processed = true;
   }
 
   // Pattern 2: QTY NAME (no unit explicitly, e.g., "2 eggs", "1 large onion")
   if (!processed) {
-    pattern = new RegExp(`^(${quantityRegexSrc})\\s+(.+)`, 'i');
-    match = str.match(pattern);
-    if (match) {
-      // Check if the "name" part actually starts with a known unit. This means it was Pattern 1 where name was just one word.
-      const namePart = match[2];
+    let pattern2 = new RegExp(`^(${quantityRegexSrc})\\s+(.+)`, 'i');
+    let match2 = str.match(pattern2);
+    if (match2) {
+      const namePart = match2[2];
       const potentialUnitInNameMatch = namePart.match(new RegExp(`^(${unitRegexSrc})\\s+(.+)`, 'i'));
       const singleWordNameIsUnitMatch = namePart.match(new RegExp(`^(${unitRegexSrc})$`, 'i'));
 
-      if (potentialUnitInNameMatch) { // e.g. "2 cups flour" matched as QTY="2", NAME="cups flour"
-        quantity = parseQuantity(match[1]);
-        unit = potentialUnitInNameMatch[1].trim();
-        const preamble = new RegExp(`^${match[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*${potentialUnitInNameMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
+      if (potentialUnitInNameMatch) { 
+        quantity = parseQuantity(match2[1]);
+        unit = potentialUnitInNameMatch[1].trim().replace(/\.$/, '');
+        const preamble = new RegExp(`^${match2[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*${potentialUnitInNameMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
         name = originalStr.trim().replace(preamble, '').trim();
-      } else if (singleWordNameIsUnitMatch) { // e.g. "2 cups" matched as QTY="2", NAME="cups"
-        quantity = parseQuantity(match[1]);
-        unit = singleWordNameIsUnitMatch[1].trim();
-        name = ''; // No actual name component left
-      } else { // e.g. "2 large onions"
-        quantity = parseQuantity(match[1]);
+      } else if (singleWordNameIsUnitMatch) { 
+        quantity = parseQuantity(match2[1]);
+        unit = singleWordNameIsUnitMatch[1].trim().replace(/\.$/, '');
+        name = ''; 
+      } else { 
+        quantity = parseQuantity(match2[1]);
         unit = '';
-        const preamble = new RegExp(`^${match[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
+        const preamble = new RegExp(`^${match2[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
         name = originalStr.trim().replace(preamble, '').trim();
       }
       processed = true;
@@ -102,16 +98,14 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
 
   // Pattern 3: NAME (QTY UNIT OptionalDetails) OptionalTrailingName (e.g., "flour (2 cups sifted) more for dusting")
   if (!processed) {
-    pattern = new RegExp(`^(.*?)\\s*\\(\\s*(${quantityRegexSrc})\\s*(${unitRegexSrc})?(.*?)\\s*\\)(.*)`, 'i');
-    match = str.match(pattern);
-    if (match) {
-      const namePartBeforeParen = match[1].trim();
-      quantity = parseQuantity(match[2]);
-      unit = match[3] ? match[3].trim() : '';
-      // detailsInParen = match[4].trim(); // can be used if needed
-      const namePartAfterParen = match[5].trim();
+    let pattern3 = new RegExp(`^(.*?)\\s*\\(\\s*(${quantityRegexSrc})\\s*(${unitRegexSrc})?(.*?)\\s*\\)(.*)`, 'i');
+    let match3 = str.match(pattern3);
+    if (match3) {
+      const namePartBeforeParen = match3[1].trim();
+      quantity = parseQuantity(match3[2]);
+      unit = match3[3] ? match3[3].trim().replace(/\.$/, '') : '';
+      const namePartAfterParen = match3[5].trim();
       
-      // Reconstruct name from original string parts to preserve case
       const openParenIndex = originalStr.toLowerCase().indexOf('(');
       const closeParenIndex = originalStr.toLowerCase().indexOf(')', openParenIndex);
 
@@ -122,7 +116,7 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
       } else { 
           name = (namePartBeforeParen + (namePartAfterParen ? ' ' + namePartAfterParen : '')).trim();
       }
-      if (!name.trim() && (namePartBeforeParen || namePartAfterParen)) { // Fallback if original string based name is empty
+      if (!name.trim() && (namePartBeforeParen || namePartAfterParen)) {
         name = (namePartBeforeParen + (namePartAfterParen ? ' ' + namePartAfterParen : '')).trim();
       }
       processed = true;
@@ -131,13 +125,13 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
   
   // Pattern 4: NAME (QTY) OptionalTrailingName (e.g. "large onions (2) finely chopped")
   if (!processed) {
-      pattern = new RegExp(`^(.*?)\\s*\\(\\s*(${quantityRegexSrc})\\s*\\)(.*)`, 'i');
-      match = str.match(pattern);
-      if (match) {
-        const namePartBeforeParen = match[1].trim();
-        quantity = parseQuantity(match[2]);
-        unit = ''; // No unit in this pattern's parenthesis
-        const namePartAfterParen = match[3].trim();
+      let pattern4 = new RegExp(`^(.*?)\\s*\\(\\s*(${quantityRegexSrc})\\s*\\)(.*)`, 'i');
+      let match4 = str.match(pattern4);
+      if (match4) {
+        const namePartBeforeParen = match4[1].trim();
+        quantity = parseQuantity(match4[2]);
+        unit = '';
+        const namePartAfterParen = match4[3].trim();
 
         const openParenIndex = originalStr.toLowerCase().indexOf('(');
         const closeParenIndex = originalStr.toLowerCase().indexOf(')', openParenIndex);
@@ -157,8 +151,6 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
   }
 
   // Fallback: If not processed, and the original string (now in 'name') potentially contains a quantity at the end
-  // Example: "All-purpose flour 2 cups" -> name="All-purpose flour", qty=2, unit="cups"
-  // This is a bit risky and less precise
   if (!processed && name === originalStr.trim()) {
     const fallbackPattern = new RegExp(`^(.*?)\\s+(${quantityRegexSrc})\\s*(${unitRegexSrc})?$`, 'i');
     const fallbackMatch = str.match(fallbackPattern);
@@ -167,48 +159,49 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
         const potentialQtyStr = fallbackMatch[2];
         const potentialUnitStr = fallbackMatch[3];
 
-        // Ensure potentialName is not empty and not just a number itself.
         if (potentialName && isNaN(parseFloat(potentialName))) {
             name = originalStr.trim().substring(0, originalStr.toLowerCase().indexOf(potentialQtyStr.toLowerCase())).trim();
             quantity = parseQuantity(potentialQtyStr);
-            unit = potentialUnitStr ? potentialUnitStr.trim() : '';
+            unit = potentialUnitStr ? potentialUnitStr.trim().replace(/\.$/, '') : '';
             processed = true;
         }
     }
   }
   
-  // Fallback for trailing number if not processed: "Ingredient Name 2"
   if (!processed && name === originalStr.trim()) {
     let trailingNumMatch = name.match(/^(.*?)\\s*(\d+\\.?\\d*)$/);
-    // Check that the potential name part isn't empty and isn't itself parseable as just a number
     if (trailingNumMatch && trailingNumMatch[1].trim() && isNaN(parseFloat(trailingNumMatch[1].trim()))) {
         const potentialName = trailingNumMatch[1].trim();
         const potentialQty = parseFloat(trailingNumMatch[2]);
         name = potentialName;
         quantity = potentialQty;
         unit = ''; 
-        // processed = true; // Mark as processed by this fallback
     }
   }
 
-
-  // Final check: if name is empty but original string wasn't, restore original string as name.
   if (!name.trim() && originalStr.trim()) {
     name = originalStr.trim();
-    if (quantity === 1 && unit === '') { // only reset quantity if it was default
-        // keep potentially parsed quantity if name just got lost
-    }
   }
   
-  // If quantity is 0 (parsed or default) and it's not a "special" unit type (like "to taste"), default to 1.
   if (quantity === 0 && unit !== "special") {
       quantity = 1;
   }
+   // Normalize common units
+  const unitLower = unit.toLowerCase();
+  if (['tbsp', 'tbs', 't', 'tablespoon'].includes(unitLower)) unit = 'tbsp';
+  if (['tsp', 't', 'teaspoon'].includes(unitLower)) unit = 'tsp';
+  if (['g', 'gm', 'gms', 'gram'].includes(unitLower)) unit = 'g';
+  if (['kg', 'kilogram'].includes(unitLower)) unit = 'kg';
+  if (['ml', 'milliliter', 'millilitre'].includes(unitLower)) unit = 'ml';
+  if (['l', 'liter', 'litre'].includes(unitLower)) unit = 'L'; // Capital L for Liter
+  if (['pc', 'pcs', 'piece'].includes(unitLower)) unit = 'piece';
+  if (['pkg', 'package'].includes(unitLower)) unit = 'package';
+
 
   return {
     name: name.trim(),
     quantity,
-    originalQuantity: quantity, // Store the parsed quantity as original
+    originalQuantity: quantity,
     unit: unit.trim(),
   };
 };
@@ -216,54 +209,35 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
 export async function handleGenerateRecipeAction(input: GenerateRecipeInput): Promise<Recipe | { error: string }> {
   try {
     const aiResponse: GenerateRecipeOutput = await generateRecipe(input);
-    const baseServings = 2; // Default assumption for servings from AI
-
+    
     const ingredients: Ingredient[] = aiResponse.ingredients.map((ingStr, index) => {
       const parsed = parseIngredientString(ingStr);
       return {
-        id: `${Date.now()}-${index}`, // Simple unique ID
+        id: `${Date.now()}-${index}`,
         name: parsed.name,
         quantity: parsed.quantity,
-        originalQuantity: parsed.originalQuantity,
+        originalQuantity: parsed.originalQuantity, // This is the quantity for the AI's baseServings
         unit: parsed.unit,
       };
     });
     
     const recipeTitle = aiResponse.title || "Untitled Recipe";
+    const recipeServings = aiResponse.servings > 0 ? aiResponse.servings : (input.baseServings || 2);
+
     const recipe: Recipe = {
       id: Date.now().toString(),
       title: recipeTitle,
       ingredients,
       instructions: aiResponse.instructions,
-      servings: baseServings,
-      baseServings: baseServings,
-      imageUrl: aiResponse.imageUrl, // Use the generated image URL
+      servings: recipeServings, // User requested or AI decided servings
+      baseServings: recipeServings, // AI generated ingredients for this many servings
+      imageUrl: aiResponse.imageUrl,
       isFavorite: false,
     };
     return recipe;
   } catch (error) {
     console.error("Error generating recipe:", error);
-    // Check if error is an instance of Error and has a message property
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return { error: `Failed to generate recipe: ${errorMessage}` };
   }
 }
-
-/* Removed handleFetchItemPrices
-export async function handleFetchItemPrices(
-  items: ShoppingListItem[]
-): Promise<GetItemPricesOutput | { error: string }> {
-  if (!items || items.length === 0) {
-    return { pricedItems: [], totalCost: 0 };
-  }
-  try {
-    const flowInput: GetItemPricesInput = { items };
-    const result: GetItemPricesOutput = await getItemPrices(flowInput);
-    return result;
-  } catch (error) {
-    console.error("Error fetching item prices:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching prices";
-    return { error: errorMessage };
-  }
-}
-*/
