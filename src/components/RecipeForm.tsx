@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react";
 import type { Recipe } from '@/lib/types';
 
 const recipeFormSchema = z.object({
-  prompt: z.string().min(10, { message: "Prompt must be at least 10 characters." }).max(500, { message: "Prompt cannot exceed 500 characters." }),
+  prompt: z.string().min(10, { message: "Prompt must be at least 10 characters." }),
 });
 
 type RecipeFormValues = z.infer<typeof recipeFormSchema>;
