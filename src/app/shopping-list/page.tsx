@@ -8,13 +8,12 @@ import type { ShoppingListItem } from '@/lib/types';
 import { ShoppingListDisplay } from '@/components/ShoppingListDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox'; // Added Checkbox
-import { Label } from '@/components/ui/label'; // Added Label
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { PlusCircle, Trash2, ListFilter, Recycle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,14 +26,105 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+// This type is for the final list passed to ShoppingListDisplay
 interface AggregatedShoppingListItem {
   key: string; // Unique key for React list, e.g., "Flour-gram"
   name: string;
-  totalQuantity: number;
-  unit: string;
+  totalQuantity: number; // This will be the display quantity (e.g., 1.25 for kg)
+  unit: string; // This will be the display unit (e.g., "kg")
   checked: boolean;
-  // sourceRecipeTitles: string[]; // For future reference
 }
+
+// Internal type for aggregation map using base units
+interface InternalAggregatedItem {
+    name: string;
+    totalBaseQuantity: number;
+    baseUnit: string;
+    originalUnitForDisplay: string; // Store the first original unit encountered for non-convertible types
+    checked: boolean; // This might need refinement, how to handle checked status across aggregations
+}
+
+const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'weight' | 'volume' | 'count' | 'other' } } = {
+  // Weight - Base: gram
+  g: { baseUnit: 'gram', multiplier: 1, type: 'weight' },
+  gram: { baseUnit: 'gram', multiplier: 1, type: 'weight' },
+  grams: { baseUnit: 'gram', multiplier: 1, type: 'weight' },
+  gm: { baseUnit: 'gram', multiplier: 1, type: 'weight' },
+  gms: { baseUnit: 'gram', multiplier: 1, type: 'weight' },
+  kg: { baseUnit: 'gram', multiplier: 1000, type: 'weight' },
+  kilogram: { baseUnit: 'gram', multiplier: 1000, type: 'weight' },
+  kilograms: { baseUnit: 'gram', multiplier: 1000, type: 'weight' },
+  // Volume - Base: milliliter
+  ml: { baseUnit: 'milliliter', multiplier: 1, type: 'volume' },
+  milliliter: { baseUnit: 'milliliter', multiplier: 1, type: 'volume' },
+  milliliters: { baseUnit: 'milliliter', multiplier: 1, type: 'volume' },
+  millilitre: { baseUnit: 'milliliter', multiplier: 1, type: 'volume' },
+  millilitres: { baseUnit: 'milliliter', multiplier: 1, type: 'volume' },
+  l: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
+  liter: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
+  liters: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
+  litre: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
+  litres: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
+  // Common Kitchen Units (treated as 'other' or 'count' depending on interpretation)
+  tbsp: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
+  tbs: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
+  tablespoon: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
+  tablespoons: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
+  tsp: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
+  tsps: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
+  teaspoon: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
+  teaspoons: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
+  cup: { baseUnit: 'cup', multiplier: 1, type: 'other' },
+  cups: { baseUnit: 'cup', multiplier: 1, type: 'other' },
+  // Pieces / Counts
+  pc: { baseUnit: 'piece', multiplier: 1, type: 'count' },
+  pcs: { baseUnit: 'piece', multiplier: 1, type: 'count' },
+  piece: { baseUnit: 'piece', multiplier: 1, type: 'count' },
+  pieces: { baseUnit: 'piece', multiplier: 1, type: 'count' },
+  // Other common recipe units
+  can: { baseUnit: 'can', multiplier: 1, type: 'count' },
+  cans: { baseUnit: 'can', multiplier: 1, type: 'count' },
+  pkg: { baseUnit: 'package', multiplier: 1, type: 'count' },
+  package: { baseUnit: 'package', multiplier: 1, type: 'count' },
+  packages: { baseUnit: 'package', multiplier: 1, type: 'count' },
+  stick: { baseUnit: 'stick', multiplier: 1, type: 'count' },
+  sticks: { baseUnit: 'stick', multiplier: 1, type: 'count' },
+  bunch: { baseUnit: 'bunch', multiplier: 1, type: 'count' },
+  bunches: { baseUnit: 'bunch', multiplier: 1, type: 'count' },
+  head: { baseUnit: 'head', multiplier: 1, type: 'count' },
+  heads: { baseUnit: 'head', multiplier: 1, type: 'count' },
+  slice: { baseUnit: 'slice', multiplier: 1, type: 'count' },
+  slices: { baseUnit: 'slice', multiplier: 1, type: 'count' },
+  clove: { baseUnit: 'clove', multiplier: 1, type: 'count' },
+  cloves: { baseUnit: 'clove', multiplier: 1, type: 'count' },
+  pinch: { baseUnit: 'pinch', multiplier: 1, type: 'other' },
+  pinches: { baseUnit: 'pinch', multiplier: 1, type: 'other' },
+  dash: { baseUnit: 'dash', multiplier: 1, type: 'other' },
+  dashes: { baseUnit: 'dash', multiplier: 1, type: 'other' },
+  // No unit / special
+  '': { baseUnit: 'unit', multiplier: 1, type: 'count' },
+  unit: { baseUnit: 'unit', multiplier: 1, type: 'count' },
+  units: { baseUnit: 'unit', multiplier: 1, type: 'count' },
+  'to taste': { baseUnit: 'to taste', multiplier: 1, type: 'other'},
+  'as needed': { baseUnit: 'as needed', multiplier: 1, type: 'other'},
+  optional: { baseUnit: 'optional', multiplier: 1, type: 'other'},
+  special: { baseUnit: 'special', multiplier: 1, type: 'other' }, // For "to taste" etc from parser
+};
+
+function getBaseEquivalent(quantity: number, unit: string): { baseQuantity: number; baseUnit: string; originalUnit: string } {
+  const normalizedUnitInput = unit.toLowerCase().replace(/\.$/, '').trim();
+  const mapping = unitMap[normalizedUnitInput];
+
+  if (mapping) {
+    return {
+      baseQuantity: quantity * mapping.multiplier,
+      baseUnit: mapping.baseUnit,
+      originalUnit: unit 
+    };
+  }
+  return { baseQuantity: quantity, baseUnit: unit.trim() || 'unit', originalUnit: unit };
+}
+
 
 export default function ShoppingListPage() {
   const [allShoppingListItems, setAllShoppingListItems] = useLocalStorage<ShoppingListItem[]>('shoppingList', []);
@@ -56,7 +146,6 @@ export default function ShoppingListPage() {
 
   const [selectedRecipeTitles, setSelectedRecipeTitles] = useState<string[]>([]);
 
-  // Initialize selectedRecipeTitles to all unique titles when component mounts or titles change
   useEffect(() => {
     if (isClient) {
       setSelectedRecipeTitles(uniqueRecipeTitles);
@@ -76,41 +165,70 @@ export default function ShoppingListPage() {
       selectedRecipeTitles.includes(item.recipeTitle || "Manually Added")
     );
 
-    const aggregationMap = new Map<string, AggregatedShoppingListItem>();
+    const internalAggregationMap = new Map<string, InternalAggregatedItem>();
 
     itemsToConsider.forEach(item => {
-      // Normalize units for common items (e.g., tbsp and tablespoon) - basic for now
-      let normalizedUnit = item.unit.toLowerCase().replace(/\.$/, ''); // remove trailing dot
-      if (normalizedUnit === 'tbsp' || normalizedUnit === 'tbs') normalizedUnit = 'tablespoon';
-      if (normalizedUnit === 'tsp' || normalizedUnit === 'tsps') normalizedUnit = 'teaspoon';
-      if (normalizedUnit === 'pcs' || normalizedUnit === 'piece') normalizedUnit = 'pc';
-
-
-      const key = `${item.name.toLowerCase().trim()}-${normalizedUnit}`;
+      const { baseQuantity, baseUnit, originalUnit } = getBaseEquivalent(item.quantity, item.unit);
+      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`;
       
-      if (aggregationMap.has(key)) {
-        const existing = aggregationMap.get(key)!;
-        existing.totalQuantity += item.quantity;
-        // existing.sourceRecipeTitles.push(item.recipeTitle || "Manually Added");
+      if (internalAggregationMap.has(key)) {
+        const existing = internalAggregationMap.get(key)!;
+        existing.totalBaseQuantity += baseQuantity;
       } else {
-        aggregationMap.set(key, {
-          key,
-          name: item.name, // Preserve original casing for display from first item
-          totalQuantity: item.quantity,
-          unit: item.unit, // Preserve original casing for unit display
-          checked: false, // Default to unchecked for aggregated items
-          // sourceRecipeTitles: [item.recipeTitle || "Manually Added"],
+        internalAggregationMap.set(key, {
+          name: item.name, 
+          totalBaseQuantity: baseQuantity,
+          baseUnit: baseUnit,
+          originalUnitForDisplay: originalUnit, // Store the first original unit encountered
+          checked: false, 
         });
       }
     });
-    return Array.from(aggregationMap.values()).sort((a,b) => a.name.localeCompare(b.name));
+
+    // Convert internal aggregation to displayable format (AggregatedShoppingListItem)
+    const displayableList: AggregatedShoppingListItem[] = [];
+    internalAggregationMap.forEach((aggItem, key) => {
+      let displayQuantity = aggItem.totalBaseQuantity;
+      let displayUnit = aggItem.baseUnit;
+
+      if (aggItem.baseUnit === 'gram' && aggItem.totalBaseQuantity >= 1000) {
+        displayQuantity = aggItem.totalBaseQuantity / 1000;
+        displayUnit = 'kg';
+      } else if (aggItem.baseUnit === 'milliliter' && aggItem.totalBaseQuantity >= 1000) {
+        displayQuantity = aggItem.totalBaseQuantity / 1000;
+        displayUnit = 'liter';
+      } else if (aggItem.baseUnit === 'gram' || aggItem.baseUnit === 'milliliter') {
+        // Keep as grams or milliliters if less than 1000
+        displayUnit = aggItem.baseUnit;
+      } else {
+         // For other units (piece, tbsp, etc.), use the originally stored unit for display consistency if needed, or just baseUnit
+        displayUnit = aggItem.originalUnitForDisplay || aggItem.baseUnit;
+      }
+      
+      // Ensure "special" units display correctly without a quantity if quantity is 0
+      if (['to taste', 'as needed', 'optional', 'special'].includes(aggItem.baseUnit) && displayQuantity === 0) {
+         displayUnit = aggItem.baseUnit; // display "to taste" etc.
+      }
+
+
+      displayableList.push({
+        key,
+        name: aggItem.name,
+        totalQuantity: displayQuantity,
+        unit: displayUnit,
+        checked: aggItem.checked, 
+      });
+    });
+    
+    return displayableList.sort((a,b) => a.name.localeCompare(b.name));
+
   }, [allShoppingListItems, selectedRecipeTitles, isClient]);
 
-  // State for managing the checked status and existence of items in the displayed aggregated list
   const [displayedListItems, setDisplayedListItems] = useState<AggregatedShoppingListItem[]>([]);
 
   useEffect(() => {
-    setDisplayedListItems(aggregatedShoppingList.map(item => ({...item, checked: false }))); // Reset checked status on aggregation change
+    // Reset checked status when underlying aggregated list changes structure
+    setDisplayedListItems(aggregatedShoppingList.map(item => ({...item, checked: false })));
   }, [aggregatedShoppingList]);
 
 
@@ -139,9 +257,9 @@ export default function ShoppingListPage() {
   };
   
   const handleClearAllUnderlyingData = () => {
-    setAllShoppingListItems([]); // This clears the local storage
-    setDisplayedListItems([]); // Also clear the view
-    setSelectedRecipeTitles([]); // Reset selections
+    setAllShoppingListItems([]); 
+    setDisplayedListItems([]); 
+    setSelectedRecipeTitles([]); 
     toast({ title: "All Shopping Data Cleared", description: "Your entire shopping list history is now empty." });
   };
 
@@ -163,12 +281,11 @@ export default function ShoppingListPage() {
       name: newItemName.trim(),
       quantity: quantity,
       unit: newItemUnit.trim(),
-      checked: false, // Default for underlying item
+      checked: false, 
       recipeTitle: "Manually Added",
     };
 
     setAllShoppingListItems(prevList => [...prevList, newItem]);
-    // If "Manually Added" wasn't selected, select it now
     if (!selectedRecipeTitles.includes("Manually Added")) {
         setSelectedRecipeTitles(prev => [...prev, "Manually Added"]);
     }
@@ -240,8 +357,8 @@ export default function ShoppingListPage() {
                   value={newItemQty} 
                   onChange={e => setNewItemQty(e.target.value)} 
                   placeholder="Qty"
-                  min="0.1"
-                  step="0.1"
+                  min="0.01" // Allow smaller quantities
+                  step="0.01" // Allow finer steps
                   className="w-full text-base"
                 />
               </div>
@@ -265,11 +382,11 @@ export default function ShoppingListPage() {
       </Card>
       
       <ShoppingListDisplay 
-        items={displayedListItems}
+        items={displayedListItems} // This now contains items with final display quantity & unit
         onUpdateItem={handleUpdateAggregatedItem}
-        onRemoveItem={handleRemoveAggregatedItem} // Remove from current view
-        onClearChecked={handleClearCheckedAggregatedItems} // Clear checked from current view
-        onClearAll={handleClearAllAggregatedItemsFromView} // Clear all from current view
+        onRemoveItem={handleRemoveAggregatedItem} 
+        onClearChecked={handleClearCheckedAggregatedItems} 
+        onClearAll={handleClearAllAggregatedItemsFromView} 
       />
 
       {allShoppingListItems.length > 0 && (
