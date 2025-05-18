@@ -7,7 +7,7 @@ import type { Recipe, ShoppingListItem } from '@/lib/types';
 import { RecipeCard } from '@/components/RecipeCard';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { Button } from '@/components/ui/button';
-import { HeartCrack, ShoppingBasket } from 'lucide-react';
+import { HeartCrack, Trash2 } from 'lucide-react'; // Added Trash2
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -110,7 +110,7 @@ export default function FavoritesPage() {
       <h1 className="text-4xl font-bold text-primary tracking-tight">My Favorite Recipes</h1>
       
       {selectedRecipe ? (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 overflow-y-auto p-4">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 overflow-y-auto p-4 animate-fadeIn">
           <div className="max-w-3xl mx-auto my-8">
             <RecipeDisplay 
               recipe={selectedRecipe} 
@@ -130,7 +130,7 @@ export default function FavoritesPage() {
               recipe={{...recipe, isFavorite: true}} // Ensure isFavorite is true when rendering from favorites
               onToggleFavorite={handleToggleFavorite}
               onSelectRecipe={handleSelectRecipe}
-              className="animate-fadeIn"
+              className="animate-fadeIn" // Added animation class
             />
           ))}
         </div>
@@ -154,6 +154,7 @@ export default function FavoritesPage() {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={() => {
                   setFavorites([]);
+                  setSelectedRecipe(null); // Clear selected recipe if any was shown
                   toast({ title: "Favorites Cleared", description: "All your favorite recipes have been removed."});
                 }}>
                   Yes, Clear All
