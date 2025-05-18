@@ -3,7 +3,7 @@
 "use server";
 
 import { generateRecipe, type GenerateRecipeInput, type GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-import { getItemPrices, type GetItemPricesInput, type GetItemPricesOutput } from '@/ai/flows/get-item-prices-flow';
+// import { getItemPrices, type GetItemPricesInput, type GetItemPricesOutput } from '@/ai/flows/get-item-prices-flow.ts'; // Removed
 import type { Recipe, Ingredient, ShoppingListItem } from '@/lib/types';
 
 const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | 'quantity' | 'unit' | 'originalQuantity'> => {
@@ -249,6 +249,7 @@ export async function handleGenerateRecipeAction(input: GenerateRecipeInput): Pr
   }
 }
 
+/* Removed handleFetchItemPrices
 export async function handleFetchItemPrices(
   items: ShoppingListItem[]
 ): Promise<GetItemPricesOutput | { error: string }> {
@@ -265,4 +266,4 @@ export async function handleFetchItemPrices(
     return { error: errorMessage };
   }
 }
-
+*/

@@ -26,6 +26,5 @@ export interface ShoppingListItem {
   unit: string;
   checked: boolean;
   recipeTitle?: string;
-  price?: number; // Simulated price for the listed quantity of the item
+  // price?: number; // Removed simulated price
 }
-

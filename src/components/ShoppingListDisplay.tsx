@@ -8,7 +8,7 @@ import type { ShoppingListItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Trash2, Edit3, Save, X, Plus, Minus, PackageOpen, RefreshCw, Loader2, Info } from 'lucide-react';
+import { Trash2, Edit3, Save, X, Plus, Minus, PackageOpen } from 'lucide-react'; // Removed RefreshCw, Loader2, Info
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -22,34 +22,35 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+// import { Skeleton } from '@/components/ui/skeleton'; // Not needed for prices
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipProvider,
+//   TooltipTrigger,
+// } from "@/components/ui/tooltip"; // Not needed for prices
 
 interface ShoppingListDisplayProps {
   items: ShoppingListItem[];
-  totalCost: number;
-  isLoadingPrices: boolean;
+  // Removed price-related props
+  // totalCost: number;
+  // isLoadingPrices: boolean;
   onUpdateItem: (updatedItem: ShoppingListItem) => void;
   onRemoveItem: (itemId: string) => void;
   onClearChecked: () => void;
   onClearAll: () => void;
-  onRefreshPrices: () => void;
+  // onRefreshPrices: () => void;
 }
 
 export function ShoppingListDisplay({ 
   items, 
-  totalCost,
-  isLoadingPrices,
+  // totalCost, // Removed
+  // isLoadingPrices, // Removed
   onUpdateItem, 
   onRemoveItem, 
   onClearChecked, 
-  onClearAll,
-  onRefreshPrices
+  onClearAll
+  // onRefreshPrices // Removed
 }: ShoppingListDisplayProps) {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{ name: string; quantity: string; unit: string }>({ name: '', quantity: '', unit: '' });
@@ -57,7 +58,7 @@ export function ShoppingListDisplay({
 
   const groupedItems = useMemo(() => {
     return items.reduce((acc, item) => {
-      const groupKey = item.recipeTitle || 'Manually Added'; // Changed 'General Items'
+      const groupKey = item.recipeTitle || 'Manually Added';
       if (!acc[groupKey]) {
         acc[groupKey] = [];
       }
@@ -80,7 +81,7 @@ export function ShoppingListDisplay({
     const currentItem = items.find(i => i.id === itemId);
     if (currentItem) {
         onUpdateItem({ 
-        ...currentItem, // keep other properties like 'checked', 'recipeTitle', 'price'
+        ...currentItem, 
         name: editValues.name, 
         quantity: newQuantity, 
         unit: editValues.unit,
@@ -95,15 +96,13 @@ export function ShoppingListDisplay({
     if (newQuantity > 0) {
       onUpdateItem({ ...item, quantity: newQuantity });
     } else {
-      // If reducing quantity to 0 or less, confirm removal or set to minimum 0.1?
-      // For now, let's remove it.
       onRemoveItem(item.id); 
       toast({ title: "Item Removed", description: `${item.name} quantity reached zero.`});
     }
   };
 
 
-  if (items.length === 0 && !isLoadingPrices) {
+  if (items.length === 0) { // Removed isLoadingPrices condition
     return (
       <div className="text-center py-10">
         <PackageOpen className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
@@ -113,25 +112,14 @@ export function ShoppingListDisplay({
     );
   }
   
-  const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  // const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }); // Removed
 
 
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-2xl text-primary font-bold">My Shopping List</CardTitle>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onRefreshPrices} disabled={isLoadingPrices} aria-label="Refresh prices">
-                {isLoadingPrices ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Refresh Prices (Simulated)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {/* Removed Refresh Prices Button and Tooltip */}
       </CardHeader>
       <CardContent className="space-y-6">
         {Object.entries(groupedItems).map(([recipeTitle, groupItems]) => (
@@ -161,24 +149,7 @@ export function ShoppingListDisplay({
                         <span className="text-sm ml-1">({item.quantity} {item.unit || 'unit(s)'})</span>
                       </label>
                       <div className="flex items-center gap-1">
-                        {isLoadingPrices && item.price === undefined ? (
-                            <Skeleton className="h-5 w-10" />
-                        ) : item.price !== undefined ? (
-                          <span className="text-sm font-semibold text-primary w-16 text-right pr-1">
-                            {currencyFormatter.format(item.price)}
-                          </span>
-                        ) : (
-                           <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                 <span className="text-sm text-muted-foreground w-16 text-right pr-1">
-                                    <Info className="h-4 w-4 inline"/>
-                                 </span>
-                              </TooltipTrigger>
-                              <TooltipContent><p>Price not available</p></TooltipContent>
-                            </Tooltip>
-                           </TooltipProvider>
-                        )}
+                        {/* Removed price display and skeleton/tooltip for price */}
                         <Button variant="outline" size="icon" onClick={() => handleQuantityChange(item, -1)} aria-label={`Decrease quantity of ${item.name}`} className="h-7 w-7"> <Minus className="h-3 w-3"/> </Button>
                         <span className="w-6 text-center tabular-nums">{item.quantity}</span>
                         <Button variant="outline" size="icon" onClick={() => handleQuantityChange(item, 1)} aria-label={`Increase quantity of ${item.name}`} className="h-7 w-7"> <Plus className="h-3 w-3"/> </Button>
@@ -195,14 +166,7 @@ export function ShoppingListDisplay({
         
         {items.length > 0 && (
             <CardFooter className="flex flex-col items-end gap-2 pt-4 border-t mt-4">
-                <div className="text-lg font-semibold">
-                    Total Estimated Cost: 
-                    {isLoadingPrices && totalCost === 0 ? (
-                        <Skeleton className="h-6 w-20 inline-block ml-2" />
-                    ) : (
-                        <span className="text-primary ml-2">{currencyFormatter.format(totalCost)}</span>
-                    )}
-                </div>
+                {/* Removed Total Estimated Cost display */}
                 <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full sm:w-auto justify-end">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -238,4 +202,3 @@ export function ShoppingListDisplay({
     </Card>
   );
 }
-
