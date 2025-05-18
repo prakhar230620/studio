@@ -1,3 +1,4 @@
+
 export interface Ingredient {
   id: string;
   name: string;
@@ -24,5 +25,7 @@ export interface ShoppingListItem {
   quantity: number;
   unit: string;
   checked: boolean;
-  recipeTitle?: string; 
+  recipeTitle?: string;
+  price?: number; // Simulated price for the listed quantity of the item
 }
+

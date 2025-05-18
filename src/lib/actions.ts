@@ -3,7 +3,8 @@
 "use server";
 
 import { generateRecipe, type GenerateRecipeInput, type GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-import type { Recipe, Ingredient } from '@/lib/types';
+import { getItemPrices, type GetItemPricesInput, type GetItemPricesOutput } from '@/ai/flows/get-item-prices-flow';
+import type { Recipe, Ingredient, ShoppingListItem } from '@/lib/types';
 
 const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | 'quantity' | 'unit' | 'originalQuantity'> => {
   const str = originalStr.toLowerCase().trim();
@@ -178,7 +179,7 @@ const parseIngredientString = (originalStr: string): Pick<Ingredient, 'name' | '
   
   // Fallback for trailing number if not processed: "Ingredient Name 2"
   if (!processed && name === originalStr.trim()) {
-    let trailingNumMatch = name.match(/^(.*?)\s*(\d+\.?\d*)$/);
+    let trailingNumMatch = name.match(/^(.*?)\\s*(\d+\\.?\\d*)$/);
     // Check that the potential name part isn't empty and isn't itself parseable as just a number
     if (trailingNumMatch && trailingNumMatch[1].trim() && isNaN(parseFloat(trailingNumMatch[1].trim()))) {
         const potentialName = trailingNumMatch[1].trim();
@@ -247,3 +248,21 @@ export async function handleGenerateRecipeAction(input: GenerateRecipeInput): Pr
     return { error: `Failed to generate recipe: ${errorMessage}` };
   }
 }
+
+export async function handleFetchItemPrices(
+  items: ShoppingListItem[]
+): Promise<GetItemPricesOutput | { error: string }> {
+  if (!items || items.length === 0) {
+    return { pricedItems: [], totalCost: 0 };
+  }
+  try {
+    const flowInput: GetItemPricesInput = { items };
+    const result: GetItemPricesOutput = await getItemPrices(flowInput);
+    return result;
+  } catch (error) {
+    console.error("Error fetching item prices:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching prices";
+    return { error: errorMessage };
+  }
+}
+
