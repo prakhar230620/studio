@@ -148,7 +148,7 @@ export function RecipeDisplay({ recipe, onAddToShoppingList, onToggleFavorite }:
           <Heart className={`mr-2 h-5 w-5 ${isFavorited ? 'text-red-500 fill-red-500' : ''}`} />
           {isFavorited ? 'Favorited' : 'Add to Favorites'}
         </Button>
-        <Button onClick={handleAddAllToShoppingList} className="w-full sm:w-auto text-base py-3 bg-primary hover:bg-primary/90">
+        <Button onClick={handleAddAllToShoppingList} className="w-full sm:w-auto text-base py-3 bg-accent hover:bg-accent/90">
           <ShoppingCart className="mr-2 h-5 w-5" />
           Add All to Shopping List
         </Button>
