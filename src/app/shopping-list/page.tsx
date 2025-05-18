@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ListFilter, Recycle, Replace, Printer, Share2 } from 'lucide-react';
+import { PlusCircle, Trash2, ListFilter, Recycle, Replace, Printer, Share2, CheckCircle } from 'lucide-react'; // Added CheckCircle
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -257,10 +257,14 @@ export default function ShoppingListPage() {
 
   const handleRemoveAggregatedItem = (itemKey: string) => {
     // This function now only affects the displayed list. Underlying data is not touched.
-    setDisplayedListItems(prevList => prevList.filter(item => item.key !== itemKey));
     const itemToRemove = displayedListItems.find(i => i.key === itemKey);
+    setDisplayedListItems(prevList => prevList.filter(item => item.key !== itemKey));
     if (itemToRemove) {
-        toast({ title: "Item Removed from View", description: `${itemToRemove.name} has been removed from the current aggregated list.` });
+        toast({ 
+            title: "Item Removed from View", 
+            description: `${itemToRemove.name} has been removed from the current aggregated list.`,
+            action: <Trash2 className="text-destructive" />
+        });
     }
   };
   
@@ -296,20 +300,32 @@ export default function ShoppingListPage() {
   const handleClearCheckedAggregatedItems = () => {
     // This function now only affects the displayed list.
     setDisplayedListItems(prevList => prevList.filter(item => !item.checked));
-    toast({ title: "Checked Items Cleared", description: "Checked items removed from current aggregated view." });
+    toast({ 
+        title: "Checked Items Cleared", 
+        description: "Checked items removed from current aggregated view.",
+        action: <Trash2 className="text-destructive" />
+    });
   };
 
   const handleClearAllAggregatedItemsFromView = () => {
      // This function now only affects the displayed list.
     setDisplayedListItems([]);
-    toast({ title: "Current List View Cleared", description: "The aggregated list view is now empty." });
+    toast({ 
+        title: "Current List View Cleared", 
+        description: "The aggregated list view is now empty.",
+        action: <Trash2 className="text-destructive" />
+    });
   };
   
   // This function clears the *source* data from localStorage
   const handleClearAllUnderlyingData = () => {
     setAllShoppingListItems([]); // This will trigger re-aggregation to an empty list
     setSelectedRecipeTitles([]); // Also clear selected recipe titles
-    toast({ title: "All Shopping Data Cleared", description: "Your entire shopping list history is now empty." });
+    toast({ 
+        title: "All Shopping Data Cleared", 
+        description: "Your entire shopping list history is now empty.",
+        action: <Recycle className="text-destructive" /> // Or Trash2
+    });
   };
 
 
@@ -342,7 +358,11 @@ export default function ShoppingListPage() {
     setNewItemName('');
     setNewItemQty('1');
     setNewItemUnit('');
-    toast({ title: "Item Added", description: `${newItem.name} has been added to 'Manually Added' items.` });
+    toast({ 
+        title: "Item Added", 
+        description: `${newItem.name} has been added to 'Manually Added' items.`,
+        action: <CheckCircle className="text-green-500" />
+    });
   };
 
   const handlePrintList = () => {

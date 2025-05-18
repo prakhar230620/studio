@@ -7,7 +7,7 @@ import type { Recipe, ShoppingListItem } from '@/lib/types';
 import { RecipeCard } from '@/components/RecipeCard';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { Button } from '@/components/ui/button';
-import { HeartCrack, Trash2 } from 'lucide-react'; // Added Trash2
+import { HeartCrack, Trash2, CheckCircle } from 'lucide-react'; // Added CheckCircle
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -51,6 +51,7 @@ export default function FavoritesPage() {
     toast({
         title: "Removed from Favorites",
         description: `${recipeToToggle.title} is no longer a favorite.`,
+        action: <HeartCrack className="text-destructive" />
     });
   };
   
@@ -76,6 +77,7 @@ export default function FavoritesPage() {
      toast({
       title: "Added to Shopping List!",
       description: `Ingredients are now in your list.`,
+      action: <CheckCircle className="text-green-500" />
     });
   };
 
@@ -155,7 +157,11 @@ export default function FavoritesPage() {
                 <AlertDialogAction onClick={() => {
                   setFavorites([]);
                   setSelectedRecipe(null); // Clear selected recipe if any was shown
-                  toast({ title: "Favorites Cleared", description: "All your favorite recipes have been removed."});
+                  toast({ 
+                    title: "Favorites Cleared", 
+                    description: "All your favorite recipes have been removed.",
+                    action: <Trash2 className="text-destructive" />
+                  });
                 }}>
                   Yes, Clear All
                 </AlertDialogAction>
