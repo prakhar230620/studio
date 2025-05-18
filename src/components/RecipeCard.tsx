@@ -34,7 +34,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelectRecipe, showFavor
 
   return (
     <Card 
-      className={`w-full shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col ${className} ${onSelectRecipe ? 'cursor-pointer' : ''}`}
+      className={`w-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex flex-col group hover:scale-[1.02] ${className} ${onSelectRecipe ? 'cursor-pointer' : ''}`}
       onClick={handleCardClick}
       aria-label={`View recipe: ${recipe.title}`}
     >
@@ -46,15 +46,16 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelectRecipe, showFavor
             layout="fill" 
             objectFit="cover" 
             data-ai-hint="recipe food"
+            className="group-hover:brightness-105 transition-all duration-300"
           />
         </div>
       )}
       <CardHeader className="pb-2 flex-grow">
-        <CardTitle className="text-xl font-semibold text-primary hover:underline">{recipe.title}</CardTitle>
+        <CardTitle className="text-xl font-semibold text-primary group-hover:text-primary/80 transition-colors">{recipe.title}</CardTitle>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground pb-4 flex-grow">
         <p>{shortInstructions}</p>
-        <p className="mt-2 text-xs">Servings: {recipe.servings}</p>
+        {recipe.servings > 0 && <p className="mt-2 text-xs">Servings: {recipe.servings}</p>}
       </CardContent>
       {showFavoriteButton && onToggleFavorite && (
         <CardFooter className="p-4 border-t">
@@ -65,7 +66,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelectRecipe, showFavor
             className="w-full text-foreground/70 hover:text-primary"
             aria-label={recipe.isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
-            <Heart className={`mr-2 h-4 w-4 ${recipe.isFavorite ? "text-red-500 fill-red-500" : ""}`} />
+            <Heart className={`mr-2 h-4 w-4 ${recipe.isFavorite ? "text-red-500 fill-red-500" : "text-muted-foreground group-hover:text-primary transition-colors"}`} />
             {recipe.isFavorite ? "Favorited" : "Favorite"}
           </Button>
         </CardFooter>
