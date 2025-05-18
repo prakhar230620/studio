@@ -3,11 +3,9 @@
 "use client";
 
 import type React from 'react';
-import type { ShoppingListItem } from '@/lib/types'; // Keep for type reference if needed, but items prop is new type
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-// import { Input } from '@/components/ui/input'; // No more direct editing here
-import { Trash2, PackageOpen } from 'lucide-react'; // Removed Edit3, Save, X, Plus, Minus
+import { Trash2, PackageOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -20,9 +18,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-// import { useToast } from "@/hooks/use-toast"; // Toasts handled by parent
 
-// Define the new prop type for aggregated items
+// Define the prop type for aggregated items
 interface AggregatedShoppingListItem {
   key: string; 
   name: string;
@@ -39,6 +36,8 @@ interface ShoppingListDisplayProps {
   onClearAll: () => void; // Clears the current displayed aggregated list
 }
 
+const specialUnits = ['to taste', 'as needed', 'optional', 'special']; // Units where quantity might be omitted if 0
+
 export function ShoppingListDisplay({ 
   items, 
   onUpdateItem, 
@@ -46,12 +45,6 @@ export function ShoppingListDisplay({
   onClearChecked, 
   onClearAll
 }: ShoppingListDisplayProps) {
-  // const { toast } = useToast(); // Parent will handle toasts
-
-  // Editing logic removed as it's complex for aggregated items
-  // const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  // const [editValues, setEditValues] = useState<{ name: string; quantity: string; unit: string }>({ name: '', quantity: '', unit: '' });
-
 
   if (items.length === 0) {
     return (
@@ -69,7 +62,6 @@ export function ShoppingListDisplay({
         <CardTitle className="text-2xl text-primary font-bold">Aggregated Shopping List</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Removed grouping by recipeTitle, list is now flat */}
         <ul className="space-y-3">
           {items.map(item => (
             <li key={item.key} className={`flex items-center gap-3 p-3 rounded-md transition-colors ${item.checked ? 'bg-muted/50 opacity-70' : 'bg-card hover:bg-muted/30'}`}>
@@ -79,15 +71,15 @@ export function ShoppingListDisplay({
                 onCheckedChange={(checked) => onUpdateItem({ ...item, checked: !!checked })}
                 aria-label={`Mark ${item.name} as ${item.checked ? 'unchecked' : 'checked'}`}
               />
-              {/* Displaying aggregated item - no direct editing or quantity adjustment */}
               <label htmlFor={`item-${item.key}`} className={`flex-grow cursor-pointer ${item.checked ? 'line-through' : ''}`}>
                 <span className="font-medium">{item.name}</span>
-                <span className="text-sm ml-1">
-                  ({item.totalQuantity % 1 === 0 ? item.totalQuantity : item.totalQuantity.toFixed(2)}{' '} 
-                  {item.unit || 'unit(s)'})
+                <span className="text-sm ml-1 text-muted-foreground">
+                  { specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0
+                    ? `(${item.unit})`
+                    : `(${item.totalQuantity % 1 === 0 ? item.totalQuantity : item.totalQuantity.toFixed(2)} ${item.unit || 'unit(s)'})`
+                  }
                 </span>
               </label>
-              {/* Removed edit and quantity adjustment buttons */}
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -138,4 +130,3 @@ export function ShoppingListDisplay({
     </Card>
   );
 }
-
