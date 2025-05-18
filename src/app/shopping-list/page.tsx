@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ListFilter, Recycle } from 'lucide-react';
+import { PlusCircle, Trash2, ListFilter, Recycle, Replace } from 'lucide-react'; // Added Replace
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,21 +26,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// This type is for the final list passed to ShoppingListDisplay
 interface AggregatedShoppingListItem {
-  key: string; // Unique key for React list, e.g., "Flour-gram"
+  key: string;
   name: string;
-  totalQuantity: number; // This will be the display quantity (e.g., 1.25 for kg)
-  unit: string; // This will be the display unit (e.g., "kg")
+  totalQuantity: number; // Current display quantity
+  unit: string;          // Current display unit
   checked: boolean;
+  baseUnit: string;        // e.g., 'gram', 'milliliter'
+  totalBaseQuantity: number; // e.g., 1500 (for grams), 1200 (for ml)
+  isConvertible: boolean;  // True if unit can be toggled (g/kg, ml/L)
 }
 
-// Internal type for aggregation map using base units
 interface InternalAggregatedItem {
     name: string;
     totalBaseQuantity: number;
     baseUnit: string;
-    // originalUnitForDisplay: string; // No longer needed for aggregated display
     checked: boolean; 
 }
 
@@ -65,7 +65,7 @@ const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'w
   liters: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
   litre: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
   litres: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
-  // Common Kitchen Units (treated as 'other' or 'count' depending on interpretation)
+  // Common Kitchen Units
   tbsp: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
   tbs: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
   tablespoon: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
@@ -102,13 +102,13 @@ const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'w
   dash: { baseUnit: 'dash', multiplier: 1, type: 'other' },
   dashes: { baseUnit: 'dash', multiplier: 1, type: 'other' },
   // No unit / special
-  '': { baseUnit: 'unit', multiplier: 1, type: 'count' }, // Handles empty string unit as 'unit'
+  '': { baseUnit: 'unit', multiplier: 1, type: 'count' },
   unit: { baseUnit: 'unit', multiplier: 1, type: 'count' },
   units: { baseUnit: 'unit', multiplier: 1, type: 'count' },
   'to taste': { baseUnit: 'to taste', multiplier: 1, type: 'other'},
   'as needed': { baseUnit: 'as needed', multiplier: 1, type: 'other'},
   optional: { baseUnit: 'optional', multiplier: 1, type: 'other'},
-  special: { baseUnit: 'special', multiplier: 1, type: 'other' }, // For "to taste" etc from parser
+  special: { baseUnit: 'special', multiplier: 1, type: 'other' },
 };
 
 function getBaseEquivalent(quantity: number, unit: string): { baseQuantity: number; baseUnit: string } {
@@ -121,7 +121,6 @@ function getBaseEquivalent(quantity: number, unit: string): { baseQuantity: numb
       baseUnit: mapping.baseUnit,
     };
   }
-  // Fallback for unknown units: treat as a distinct unit type
   return { baseQuantity: quantity, baseUnit: unit.trim() || 'unit' };
 }
 
@@ -169,7 +168,7 @@ export default function ShoppingListPage() {
 
     itemsToConsider.forEach(item => {
       const { baseQuantity, baseUnit } = getBaseEquivalent(item.quantity, item.unit);
-      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`; // Key includes base unit to differentiate e.g. flour (grams) vs flour (cups)
+      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`;
       
       if (internalAggregationMap.has(key)) {
         const existing = internalAggregationMap.get(key)!;
@@ -179,7 +178,7 @@ export default function ShoppingListPage() {
           name: item.name, 
           totalBaseQuantity: baseQuantity,
           baseUnit: baseUnit,
-          checked: false, // Initial checked state for new aggregated item
+          checked: false,
         });
       }
     });
@@ -188,34 +187,35 @@ export default function ShoppingListPage() {
     internalAggregationMap.forEach((aggItem, key) => {
       let displayQuantity = aggItem.totalBaseQuantity;
       let displayUnit = aggItem.baseUnit;
+      let isConvertible = false;
 
       if (aggItem.baseUnit === 'gram') {
+        isConvertible = true;
         if (aggItem.totalBaseQuantity >= 1000) {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'kg';
         } else {
-          displayUnit = 'g'; // Use 'g' for grams if less than 1kg
+          displayUnit = 'g';
         }
       } else if (aggItem.baseUnit === 'milliliter') {
+        isConvertible = true;
         if (aggItem.totalBaseQuantity >= 1000) {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
-          displayUnit = 'L'; // Use 'L' for liters
+          displayUnit = 'L';
         } else {
-          displayUnit = 'ml'; // Use 'ml' for milliliters if less than 1L
+          displayUnit = 'ml';
         }
       }
-      // For other base units (piece, tbsp, cup, etc.), displayUnit is already aggItem.baseUnit.
-      // These base units are expected to be display-friendly from unitMap.
       
-      // Special units like "to taste" might have quantity 0 from parsing.
-      // The display component will handle how to show these (e.g., hide quantity if 0 for such units).
-
       displayableList.push({
         key,
         name: aggItem.name,
         totalQuantity: displayQuantity,
         unit: displayUnit,
-        checked: aggItem.checked, 
+        checked: aggItem.checked,
+        baseUnit: aggItem.baseUnit,
+        totalBaseQuantity: aggItem.totalBaseQuantity,
+        isConvertible: isConvertible,
       });
     });
     
@@ -226,8 +226,6 @@ export default function ShoppingListPage() {
   const [displayedListItems, setDisplayedListItems] = useState<AggregatedShoppingListItem[]>([]);
 
   useEffect(() => {
-    // Reset checked status when underlying aggregated list changes structure (e.g. recipe selection changes)
-    // or when a new item is added/removed from allShoppingListItems which rebuilds aggregatedShoppingList
     setDisplayedListItems(aggregatedShoppingList.map(item => ({...item, checked: false })));
   }, [aggregatedShoppingList]);
 
@@ -239,8 +237,6 @@ export default function ShoppingListPage() {
   };
 
   const handleRemoveAggregatedItem = (itemKey: string) => {
-    // This only removes from the current view. It doesn't affect allShoppingListItems.
-    // If you want to remove underlying data, that's a different operation.
     setDisplayedListItems(prevList => prevList.filter(item => item.key !== itemKey));
     const itemToRemove = displayedListItems.find(i => i.key === itemKey);
     if (itemToRemove) {
@@ -248,6 +244,35 @@ export default function ShoppingListPage() {
     }
   };
   
+  const handleToggleUnit = (itemKey: string) => {
+    setDisplayedListItems(prevList =>
+      prevList.map(item => {
+        if (item.key === itemKey && item.isConvertible) {
+          const newItem = { ...item };
+          if (item.baseUnit === 'gram') {
+            if (item.unit === 'g') {
+              newItem.unit = 'kg';
+              newItem.totalQuantity = item.totalBaseQuantity / 1000;
+            } else { // unit is 'kg'
+              newItem.unit = 'g';
+              newItem.totalQuantity = item.totalBaseQuantity;
+            }
+          } else if (item.baseUnit === 'milliliter') {
+            if (item.unit === 'ml') {
+              newItem.unit = 'L';
+              newItem.totalQuantity = item.totalBaseQuantity / 1000;
+            } else { // unit is 'L'
+              newItem.unit = 'ml';
+              newItem.totalQuantity = item.totalBaseQuantity;
+            }
+          }
+          return newItem;
+        }
+        return item;
+      })
+    );
+  };
+
   const handleClearCheckedAggregatedItems = () => {
     setDisplayedListItems(prevList => prevList.filter(item => !item.checked));
     toast({ title: "Checked Items Cleared", description: "Checked items removed from current aggregated view." });
@@ -259,9 +284,7 @@ export default function ShoppingListPage() {
   };
   
   const handleClearAllUnderlyingData = () => {
-    setAllShoppingListItems([]); // This clears the source data in localStorage
-    // displayedListItems will auto-clear due to useEffect on aggregatedShoppingList
-    // selectedRecipeTitles will auto-clear as uniqueRecipeTitles becomes empty
+    setAllShoppingListItems([]);
     toast({ title: "All Shopping Data Cleared", description: "Your entire shopping list history is now empty." });
   };
 
@@ -284,11 +307,10 @@ export default function ShoppingListPage() {
       quantity: quantity,
       unit: newItemUnit.trim(),
       checked: false, 
-      recipeTitle: "Manually Added", // Consistent title for manually added items
+      recipeTitle: "Manually Added",
     };
 
     setAllShoppingListItems(prevList => [...prevList, newItem]);
-    // Ensure "Manually Added" is selected if not already
     if (!selectedRecipeTitles.includes("Manually Added")) {
         setSelectedRecipeTitles(prev => [...prev, "Manually Added"]);
     }
@@ -301,7 +323,7 @@ export default function ShoppingListPage() {
 
 
   if (!isClient) {
-     return ( // Basic skeleton for SSR or initial client render before hydration
+     return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold text-primary">My Shopping List</h1>
         <Card className="w-full max-w-2xl mx-auto shadow-md"><CardContent className="p-6"><Skeleton className="h-10 w-full" /></CardContent></Card>
@@ -360,8 +382,8 @@ export default function ShoppingListPage() {
                   value={newItemQty} 
                   onChange={e => setNewItemQty(e.target.value)} 
                   placeholder="Qty"
-                  min="0.01" // Allow smaller quantities like 0.25
-                  step="any" // Allow any decimal for flexibility
+                  min="0.01"
+                  step="any"
                   className="w-full text-base"
                 />
               </div>
@@ -389,7 +411,8 @@ export default function ShoppingListPage() {
         onUpdateItem={handleUpdateAggregatedItem}
         onRemoveItem={handleRemoveAggregatedItem} 
         onClearChecked={handleClearCheckedAggregatedItems} 
-        onClearAll={handleClearAllAggregatedItemsFromView} 
+        onClearAll={handleClearAllAggregatedItemsFromView}
+        onToggleUnit={handleToggleUnit}
       />
 
       {allShoppingListItems.length > 0 && (
