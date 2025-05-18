@@ -10,19 +10,19 @@
     --card-foreground: 210 20% 25%;
     --popover: 0 0% 100%;
     --popover-foreground: 210 20% 25%;
-    --primary: 200 70% 45%; /* Strong Cerulean Blue */
+    --primary: 340 85% 55%; /* Vibrant Pink/Magenta */
     --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 210 30% 90%; /* Light cool grey */
-    --secondary-foreground: 210 20% 35%; /* Slightly lighter dark cool grey */
+    --secondary: 260 70% 92%; /* Light Lavender */
+    --secondary-foreground: 260 30% 30%; /* Dark Purple */
     --muted: 210 30% 94%; /* Lighter version of secondary */
     --muted-foreground: 210 15% 50%; /* Medium cool grey */
-    --accent: 30 90% 55%; /* Vibrant Orange */
-    --accent-foreground: 0 0% 100%; /* White */
+    --accent: 45 90% 55%; /* Bright Yellow/Gold */
+    --accent-foreground: 210 20% 15%; /* Dark grey for contrast on accent */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 210 20% 85%; /* Subtle cool grey border */
     --input: 210 20% 92%; /* Slightly darker than background for input */
-    --ring: 200 70% 45%; /* Same as primary */
+    --ring: 340 85% 55%; /* Same as primary */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -31,46 +31,46 @@
     --radius: 0.5rem;
 
     /* Sidebar variables */
-    --sidebar-background: 210 30% 96%; /* Slightly off primary background */
+    --sidebar-background: 210 30% 96%; 
     --sidebar-foreground: 210 20% 30%;
-    --sidebar-primary: 200 65% 40%; /* Darker shade of primary for sidebar emphasis */
+    --sidebar-primary: 340 80% 50%; 
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 85% 50%; /* Slightly muted accent for sidebar */
-    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-accent: 45 85% 50%; 
+    --sidebar-accent-foreground: 210 20% 15%;
     --sidebar-border: 210 20% 80%;
-    --sidebar-ring: 200 65% 40%;
+    --sidebar-ring: 340 80% 50%;
   }
 
   .dark {
-    --background: 210 20% 12%; /* Very dark cool blue/grey */
-    --foreground: 210 30% 90%; /* Light cool grey */
-    --card: 210 18% 15%;
-    --card-foreground: 210 30% 90%;
-    --popover: 210 18% 15%;
-    --popover-foreground: 210 30% 90%;
-    --primary: 200 70% 55%; /* Slightly lighter Cerulean Blue for dark mode */
-    --primary-foreground: 210 20% 15%; /* Dark grey for contrast on primary */
-    --secondary: 210 15% 25%; /* Darker cool grey */
-    --secondary-foreground: 210 30% 85%; /* Lighter cool grey */
-    --muted: 210 15% 20%; /* Even darker cool grey */
-    --muted-foreground: 210 20% 60%; /* Medium-light cool grey */
-    --accent: 30 85% 60%; /* Slightly desaturated Orange for dark mode */
-    --accent-foreground: 210 20% 15%; /* Dark grey for contrast on accent */
+    --background: 260 25% 10%; /* Deep Indigo/Dark Purple */
+    --foreground: 260 30% 90%; /* Light Lavender/Off-white */
+    --card: 260 23% 13%;
+    --card-foreground: 260 30% 90%;
+    --popover: 260 23% 13%;
+    --popover-foreground: 260 30% 90%;
+    --primary: 340 90% 65%; /* Brighter Pink/Magenta for dark mode */
+    --primary-foreground: 260 20% 10%; /* Dark purple for contrast on primary */
+    --secondary: 260 20% 22%; /* Darker Purple/Indigo */
+    --secondary-foreground: 260 30% 85%; /* Lighter Lavender */
+    --muted: 260 20% 18%; /* Even darker Purple/Indigo */
+    --muted-foreground: 260 25% 60%; /* Medium-light Lavender */
+    --accent: 45 95% 60%; /* Brighter Yellow/Gold for dark mode */
+    --accent-foreground: 260 20% 10%; /* Dark purple for contrast on accent */
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 15% 30%; /* Subtle dark border */
-    --input: 210 15% 28%; /* Slightly lighter than background for input */
-    --ring: 200 70% 55%; /* Same as dark primary */
+    --border: 260 15% 28%; /* Subtle dark border */
+    --input: 260 15% 25%; /* Slightly lighter than background for input */
+    --ring: 340 90% 65%; /* Same as dark primary */
     
     /* Dark Sidebar variables */
-    --sidebar-background: 210 18% 10%; /* Even darker than main dark bg */
-    --sidebar-foreground: 210 30% 88%;
-    --sidebar-primary: 200 65% 50%; 
-    --sidebar-primary-foreground: 210 20% 10%;
-    --sidebar-accent: 30 80% 55%;
-    --sidebar-accent-foreground: 210 20% 10%;
-    --sidebar-border: 210 15% 25%;
-    --sidebar-ring: 200 65% 50%;
+    --sidebar-background: 260 22% 8%; 
+    --sidebar-foreground: 260 30% 88%;
+    --sidebar-primary: 340 85% 60%; 
+    --sidebar-primary-foreground: 260 20% 8%;
+    --sidebar-accent: 45 90% 55%;
+    --sidebar-accent-foreground: 260 20% 8%;
+    --sidebar-border: 260 15% 22%;
+    --sidebar-ring: 340 85% 60%;
   }
 }
 
@@ -91,4 +91,97 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Print specific styles */
+@media print {
+  body {
+    font-size: 10pt; /* Smaller font for print */
+    color: #000 !important; /* Ensure text is black for print */
+    background-color: #fff !important; /* Ensure background is white */
+  }
+
+  /* Hide non-essential elements */
+  header.sticky, /* Navbar */
+  body > footer, /* Main footer */
+  .recipe-filter-card,
+  .manual-add-item-card,
+  .shopping-list-page-actions-card, /* Card containing Print/Share buttons */
+  .shopping-list-footer-actions, /* CardFooter in ShoppingListDisplay containing Clear Checked/All */
+  .clear-all-underlying-data-button-container, /* Container for the "Clear All Underlying Shopping Data" button */
+  .shopping-list-item-actions /* Container for toggle unit and remove item buttons within each list item */
+  {
+    display: none !important;
+  }
+
+  /* Style the shopping list display for print */
+  .shopping-list-display-card {
+    box-shadow: none !important;
+    border: none !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+   .shopping-list-display-card .card-header, /* CardHeader within ShoppingListDisplay */
+   .shopping-list-display-card > .card-content > .card-footer /* CardFooter within ShoppingListDisplay */
+   {
+    display: block !important; /* Ensure CardHeader is visible */
+    padding-bottom: 0.5rem !important;
+    border-bottom: 1px solid #ccc; /* Add a line under the title for print */
+  }
+  .shopping-list-display-card .card-header .card-title {
+     font-size: 1.5rem !important;
+     text-align: left !important;
+  }
+
+  .shopping-list-display-card ul {
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+  }
+  .shopping-list-display-card li {
+    page-break-inside: avoid;
+    border-bottom: 1px dotted #eee;
+    padding: 0.3rem 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+  }
+  .shopping-list-display-card li:last-child {
+    border-bottom: none;
+  }
+  
+  .shopping-list-display-card .hide-on-print {
+    display: none !important;
+  }
+
+  .shopping-list-display-card .checkbox-print-placeholder {
+    display: inline-block;
+    margin-right: 0.5em; /* Space between checkbox placeholder and label */
+    font-family: monospace;
+    line-height: inherit; /* Align with label text */
+  }
+  .shopping-list-display-card .checkbox-print-placeholder.checked::before {
+    content: "[x]";
+  }
+  .shopping-list-display-card .checkbox-print-placeholder:not(.checked)::before {
+    content: "[ ]";
+  }
+  
+  .shopping-list-display-card li label {
+    line-height: inherit; /* Align with checkbox placeholder */
+  }
+  .shopping-list-display-card li label span.font-medium { /* Item name */
+    font-weight: bold; /* Make item name bold for print */
+  }
+  .shopping-list-display-card li label span.text-muted-foreground { /* Quantity and unit */
+    color: #333 !important; /* Darker color for quantity/unit */
+    font-style: italic;
+  }
+  .shopping-list-display-card li.opacity-70 { /* If item was checked, remove opacity for print */
+    opacity: 1 !important;
+  }
+  .shopping-list-display-card li.opacity-70 label.line-through {
+    text-decoration: none !important; /* Remove line-through for print if needed, or keep it */
+  }
 }

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ListFilter, Recycle, Replace } from 'lucide-react'; // Added Replace
+import { PlusCircle, Trash2, ListFilter, Recycle, Replace, Printer, Share2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,12 +29,12 @@ import {
 interface AggregatedShoppingListItem {
   key: string;
   name: string;
-  totalQuantity: number; // Current display quantity
-  unit: string;          // Current display unit
+  totalQuantity: number; 
+  unit: string;          
   checked: boolean;
-  baseUnit: string;        // e.g., 'gram', 'milliliter'
-  totalBaseQuantity: number; // e.g., 1500 (for grams), 1200 (for ml)
-  isConvertible: boolean;  // True if unit can be toggled (g/kg, ml/L)
+  baseUnit: string;        
+  totalBaseQuantity: number; 
+  isConvertible: boolean;  
 }
 
 interface InternalAggregatedItem {
@@ -111,6 +111,9 @@ const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'w
   special: { baseUnit: 'special', multiplier: 1, type: 'other' },
 };
 
+const specialUnits = ['to taste', 'as needed', 'optional', 'special'];
+
+
 function getBaseEquivalent(quantity: number, unit: string): { baseQuantity: number; baseUnit: string } {
   const normalizedUnitInput = unit.toLowerCase().replace(/\.$/, '').trim();
   const mapping = unitMap[normalizedUnitInput];
@@ -134,8 +137,13 @@ export default function ShoppingListPage() {
   const { toast } = useToast();
 
   const [isClient, setIsClient] = useState(false);
+  const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
+
   useEffect(() => {
     setIsClient(true);
+    if (typeof navigator.share === 'function') {
+      setIsShareApiAvailable(true);
+    }
   }, []);
 
   const uniqueRecipeTitles = useMemo(() => {
@@ -178,7 +186,7 @@ export default function ShoppingListPage() {
           name: item.name, 
           totalBaseQuantity: baseQuantity,
           baseUnit: baseUnit,
-          checked: false,
+          checked: false, // Default checked state for new aggregated items
         });
       }
     });
@@ -226,7 +234,13 @@ export default function ShoppingListPage() {
   const [displayedListItems, setDisplayedListItems] = useState<AggregatedShoppingListItem[]>([]);
 
   useEffect(() => {
-    setDisplayedListItems(aggregatedShoppingList.map(item => ({...item, checked: false })));
+    // Preserve checked state if item already exists in displayedListItems
+    setDisplayedListItems(prevDisplayed => {
+        return aggregatedShoppingList.map(newItem => {
+            const existingItem = prevDisplayed.find(oldItem => oldItem.key === newItem.key);
+            return existingItem ? { ...newItem, checked: existingItem.checked } : { ...newItem, checked: false };
+        });
+    });
   }, [aggregatedShoppingList]);
 
 
@@ -237,6 +251,7 @@ export default function ShoppingListPage() {
   };
 
   const handleRemoveAggregatedItem = (itemKey: string) => {
+    // This function now only affects the displayed list. Underlying data is not touched.
     setDisplayedListItems(prevList => prevList.filter(item => item.key !== itemKey));
     const itemToRemove = displayedListItems.find(i => i.key === itemKey);
     if (itemToRemove) {
@@ -274,17 +289,21 @@ export default function ShoppingListPage() {
   };
 
   const handleClearCheckedAggregatedItems = () => {
+    // This function now only affects the displayed list.
     setDisplayedListItems(prevList => prevList.filter(item => !item.checked));
     toast({ title: "Checked Items Cleared", description: "Checked items removed from current aggregated view." });
   };
 
   const handleClearAllAggregatedItemsFromView = () => {
+     // This function now only affects the displayed list.
     setDisplayedListItems([]);
     toast({ title: "Current List View Cleared", description: "The aggregated list view is now empty." });
   };
   
+  // This function clears the *source* data from localStorage
   const handleClearAllUnderlyingData = () => {
-    setAllShoppingListItems([]);
+    setAllShoppingListItems([]); // This will trigger re-aggregation to an empty list
+    setSelectedRecipeTitles([]); // Also clear selected recipe titles
     toast({ title: "All Shopping Data Cleared", description: "Your entire shopping list history is now empty." });
   };
 
@@ -305,7 +324,7 @@ export default function ShoppingListPage() {
       id: `manual-${Date.now()}`,
       name: newItemName.trim(),
       quantity: quantity,
-      unit: newItemUnit.trim(),
+      unit: newItemUnit.trim() || 'unit', // Default to 'unit' if empty
       checked: false, 
       recipeTitle: "Manually Added",
     };
@@ -321,12 +340,44 @@ export default function ShoppingListPage() {
     toast({ title: "Item Added", description: `${newItem.name} has been added to 'Manually Added' items.` });
   };
 
+  const handlePrintList = () => {
+    window.print();
+  };
+
+  const handleShareList = async () => {
+    if (!navigator.share) {
+      toast({ title: "Share API not supported", description: "Your browser does not support the Web Share API.", variant: "destructive" });
+      return;
+    }
+    const listText = displayedListItems
+      .map(item => {
+        const qtyStr = specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0
+          ? ``
+          : `${item.totalQuantity % 1 === 0 ? item.totalQuantity : item.totalQuantity.toFixed(2)} ${item.unit || 'unit(s)'}`;
+        return `${item.name}${qtyStr ? ` (${qtyStr})` : ''}${item.checked ? ' (Purchased)' : ''}`;
+      })
+      .join('\n');
+
+    const shareData = {
+      title: 'My Shopping List',
+      text: `Here's my shopping list:\n${listText}`,
+    };
+    try {
+      await navigator.share(shareData);
+      toast({ title: "List Shared!", description: "Your shopping list has been shared." });
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+          toast({ title: "Share Failed", description: "Could not share the list.", variant: "destructive" });
+      }
+    }
+  };
+
 
   if (!isClient) {
      return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold text-primary">My Shopping List</h1>
-        <Card className="w-full max-w-2xl mx-auto shadow-md"><CardContent className="p-6"><Skeleton className="h-10 w-full" /></CardContent></Card>
+        <Card className="w-full max-w-2xl mx-auto shadow-md recipe-filter-card"><CardContent className="p-6"><Skeleton className="h-10 w-full" /></CardContent></Card>
         <div className="bg-muted h-64 rounded-lg animate-pulse max-w-2xl mx-auto"></div>
       </div>
     );
@@ -334,7 +385,7 @@ export default function ShoppingListPage() {
 
   return (
     <div className="space-y-8">
-      <Card className="w-full max-w-2xl mx-auto shadow-md">
+      <Card className="w-full max-w-2xl mx-auto shadow-md recipe-filter-card">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-center text-primary flex items-center justify-center gap-2">
             <ListFilter className="h-5 w-5" /> Filter Recipes for Shopping List
@@ -356,7 +407,7 @@ export default function ShoppingListPage() {
         </CardContent>
       </Card>
 
-      <Card className="w-full max-w-2xl mx-auto shadow-md">
+      <Card className="w-full max-w-2xl mx-auto shadow-md manual-add-item-card">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-center">Add Item Manually</CardTitle>
         </CardHeader>
@@ -406,6 +457,24 @@ export default function ShoppingListPage() {
         </CardContent>
       </Card>
       
+      {displayedListItems.length > 0 && (
+        <Card className="w-full max-w-2xl mx-auto shadow-md shopping-list-page-actions-card">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-center">List Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row justify-center items-center gap-3">
+            <Button onClick={handlePrintList} variant="outline" className="w-full sm:w-auto">
+              <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
+            </Button>
+            {isShareApiAvailable && (
+              <Button onClick={handleShareList} variant="outline" className="w-full sm:w-auto">
+                <Share2 className="mr-2 h-4 w-4" /> Share List
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <ShoppingListDisplay 
         items={displayedListItems} 
         onUpdateItem={handleUpdateAggregatedItem}
@@ -416,7 +485,7 @@ export default function ShoppingListPage() {
       />
 
       {allShoppingListItems.length > 0 && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex justify-center clear-all-underlying-data-button-container">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant="destructive" className="flex items-center gap-2">
@@ -445,4 +514,3 @@ export default function ShoppingListPage() {
     </div>
   );
 }
-

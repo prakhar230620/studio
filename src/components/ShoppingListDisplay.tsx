@@ -5,7 +5,7 @@
 import type React from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, PackageOpen, Replace } from 'lucide-react'; // Added Replace
+import { Trash2, PackageOpen, Replace } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -25,9 +25,9 @@ interface AggregatedShoppingListItem {
   totalQuantity: number;
   unit: string;
   checked: boolean;
-  baseUnit: string; // For toggling
-  totalBaseQuantity: number; // For toggling
-  isConvertible: boolean; // For toggling
+  baseUnit: string; 
+  totalBaseQuantity: number; 
+  isConvertible: boolean; 
 }
 
 interface ShoppingListDisplayProps {
@@ -36,7 +36,7 @@ interface ShoppingListDisplayProps {
   onRemoveItem: (itemKey: string) => void;
   onClearChecked: () => void;
   onClearAll: () => void;
-  onToggleUnit: (itemKey: string) => void; // New prop
+  onToggleUnit: (itemKey: string) => void; 
 }
 
 const specialUnits = ['to taste', 'as needed', 'optional', 'special'];
@@ -47,7 +47,7 @@ export function ShoppingListDisplay({
   onRemoveItem, 
   onClearChecked, 
   onClearAll,
-  onToggleUnit // New prop
+  onToggleUnit 
 }: ShoppingListDisplayProps) {
 
   if (items.length === 0) {
@@ -72,7 +72,7 @@ export function ShoppingListDisplay({
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-lg">
+    <Card className="w-full max-w-2xl mx-auto shadow-lg shopping-list-display-card">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-2xl text-primary font-bold">Aggregated Shopping List</CardTitle>
       </CardHeader>
@@ -87,7 +87,9 @@ export function ShoppingListDisplay({
                   checked={item.checked}
                   onCheckedChange={(checked) => onUpdateItem({ ...item, checked: !!checked })}
                   aria-label={`Mark ${item.name} as ${item.checked ? 'unchecked' : 'checked'}`}
+                  className="hide-on-print"
                 />
+                <span className={`checkbox-print-placeholder ${item.checked ? 'checked' : ''}`} aria-hidden="true"></span>
                 <label htmlFor={`item-${item.key}`} className={`flex-grow cursor-pointer ${item.checked ? 'line-through' : ''}`}>
                   <span className="font-medium">{item.name}</span>
                   <span className="text-sm ml-1 text-muted-foreground">
@@ -97,34 +99,36 @@ export function ShoppingListDisplay({
                     }
                   </span>
                 </label>
-                {item.isConvertible && nextUnit && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onToggleUnit(item.key)}
-                    aria-label={`Switch unit for ${item.name} to ${nextUnit}`}
-                    className="h-7 w-7 text-muted-foreground hover:text-primary"
-                    title={`Switch to ${nextUnit}`}
+                <div className="shopping-list-item-actions flex items-center gap-1">
+                  {item.isConvertible && nextUnit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onToggleUnit(item.key)}
+                      aria-label={`Switch unit for ${item.name} to ${nextUnit}`}
+                      className="h-7 w-7 text-muted-foreground hover:text-primary"
+                      title={`Switch to ${nextUnit}`}
+                    >
+                      <Replace className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => onRemoveItem(item.key)} 
+                    aria-label={`Remove ${item.name} from this list view`} 
+                    className="h-8 w-8"
                   >
-                    <Replace className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 text-red-600"/>
                   </Button>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => onRemoveItem(item.key)} 
-                  aria-label={`Remove ${item.name} from this list view`} 
-                  className="h-8 w-8"
-                >
-                  <Trash2 className="h-4 w-4 text-red-600"/>
-                </Button>
+                </div>
               </li>
             );
           })}
         </ul>
         
         {items.length > 0 && (
-            <CardFooter className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-4 border-t mt-4">
+            <CardFooter className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-4 border-t mt-4 shopping-list-footer-actions">
                 <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full sm:w-auto sm:justify-end">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -160,4 +164,3 @@ export function ShoppingListDisplay({
     </Card>
   );
 }
-
