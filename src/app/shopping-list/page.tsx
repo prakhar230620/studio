@@ -44,6 +44,7 @@ interface InternalAggregatedItem {
     checked: boolean; 
 }
 
+// Standard conversions: 1 cup = 240ml, 1 tbsp = 15ml, 1 tsp = 5ml
 const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'weight' | 'volume' | 'count' | 'other' } } = {
   // Weight - Base: gram
   g: { baseUnit: 'gram', multiplier: 1, type: 'weight' },
@@ -65,23 +66,23 @@ const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'w
   liters: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
   litre: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
   litres: { baseUnit: 'milliliter', multiplier: 1000, type: 'volume' },
-  // Common Kitchen Units
-  tbsp: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
-  tbs: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
-  tablespoon: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
-  tablespoons: { baseUnit: 'tablespoon', multiplier: 1, type: 'other' },
-  tsp: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
-  tsps: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
-  teaspoon: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
-  teaspoons: { baseUnit: 'teaspoon', multiplier: 1, type: 'other' },
-  cup: { baseUnit: 'cup', multiplier: 1, type: 'other' },
-  cups: { baseUnit: 'cup', multiplier: 1, type: 'other' },
-  // Pieces / Counts
+  // Common Kitchen Units - Mapped to milliliter
+  tbsp: { baseUnit: 'milliliter', multiplier: 15, type: 'volume' },
+  tbs: { baseUnit: 'milliliter', multiplier: 15, type: 'volume' },
+  tablespoon: { baseUnit: 'milliliter', multiplier: 15, type: 'volume' },
+  tablespoons: { baseUnit: 'milliliter', multiplier: 15, type: 'volume' },
+  tsp: { baseUnit: 'milliliter', multiplier: 5, type: 'volume' },
+  tsps: { baseUnit: 'milliliter', multiplier: 5, type: 'volume' },
+  teaspoon: { baseUnit: 'milliliter', multiplier: 5, type: 'volume' },
+  teaspoons: { baseUnit: 'milliliter', multiplier: 5, type: 'volume' },
+  cup: { baseUnit: 'milliliter', multiplier: 240, type: 'volume' }, // US Cup
+  cups: { baseUnit: 'milliliter', multiplier: 240, type: 'volume' },
+  // Pieces / Counts - Base: piece
   pc: { baseUnit: 'piece', multiplier: 1, type: 'count' },
   pcs: { baseUnit: 'piece', multiplier: 1, type: 'count' },
   piece: { baseUnit: 'piece', multiplier: 1, type: 'count' },
   pieces: { baseUnit: 'piece', multiplier: 1, type: 'count' },
-  // Other common recipe units
+  // Other common recipe units (mostly counts or specific types)
   can: { baseUnit: 'can', multiplier: 1, type: 'count' },
   cans: { baseUnit: 'can', multiplier: 1, type: 'count' },
   pkg: { baseUnit: 'package', multiplier: 1, type: 'count' },
@@ -97,18 +98,19 @@ const unitMap: { [key: string]: { baseUnit: string; multiplier: number; type: 'w
   slices: { baseUnit: 'slice', multiplier: 1, type: 'count' },
   clove: { baseUnit: 'clove', multiplier: 1, type: 'count' },
   cloves: { baseUnit: 'clove', multiplier: 1, type: 'count' },
+  // "Other" types - not typically aggregated by quantity in the same way as weight/volume/count
   pinch: { baseUnit: 'pinch', multiplier: 1, type: 'other' },
   pinches: { baseUnit: 'pinch', multiplier: 1, type: 'other' },
   dash: { baseUnit: 'dash', multiplier: 1, type: 'other' },
   dashes: { baseUnit: 'dash', multiplier: 1, type: 'other' },
   // No unit / special
-  '': { baseUnit: 'unit', multiplier: 1, type: 'count' },
+  '': { baseUnit: 'unit', multiplier: 1, type: 'count' }, // Default to 'unit' if empty
   unit: { baseUnit: 'unit', multiplier: 1, type: 'count' },
   units: { baseUnit: 'unit', multiplier: 1, type: 'count' },
   'to taste': { baseUnit: 'to taste', multiplier: 1, type: 'other'},
   'as needed': { baseUnit: 'as needed', multiplier: 1, type: 'other'},
   optional: { baseUnit: 'optional', multiplier: 1, type: 'other'},
-  special: { baseUnit: 'special', multiplier: 1, type: 'other' },
+  special: { baseUnit: 'special', multiplier: 1, type: 'other' }, // For parsed "to taste", etc.
 };
 
 const specialUnits = ['to taste', 'as needed', 'optional', 'special'];
@@ -124,6 +126,7 @@ function getBaseEquivalent(quantity: number, unit: string): { baseQuantity: numb
       baseUnit: mapping.baseUnit,
     };
   }
+  // Fallback if unit is not in map: treat it as its own base unit (likely 'other' or 'count' type)
   return { baseQuantity: quantity, baseUnit: unit.trim() || 'unit' };
 }
 
@@ -176,7 +179,7 @@ export default function ShoppingListPage() {
 
     itemsToConsider.forEach(item => {
       const { baseQuantity, baseUnit } = getBaseEquivalent(item.quantity, item.unit);
-      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`;
+      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`; // Key includes base unit for correct aggregation
       
       if (internalAggregationMap.has(key)) {
         const existing = internalAggregationMap.get(key)!;
@@ -197,30 +200,32 @@ export default function ShoppingListPage() {
       let displayUnit = aggItem.baseUnit;
       let isConvertible = false;
 
+      // Convert to larger units for display if applicable
       if (aggItem.baseUnit === 'gram') {
-        isConvertible = true;
+        isConvertible = true; // g <-> kg
         if (aggItem.totalBaseQuantity >= 1000) {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'kg';
         } else {
-          displayUnit = 'g';
+          displayUnit = 'g'; // keep as grams if less than 1kg
         }
       } else if (aggItem.baseUnit === 'milliliter') {
-        isConvertible = true;
+        isConvertible = true; // ml <-> L
         if (aggItem.totalBaseQuantity >= 1000) {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'L';
         } else {
-          displayUnit = 'ml';
+          displayUnit = 'ml'; // keep as ml if less than 1L
         }
       }
+      // Other base units (piece, can, pinch, etc.) are displayed as is
       
       displayableList.push({
         key,
         name: aggItem.name,
         totalQuantity: displayQuantity,
         unit: displayUnit,
-        checked: aggItem.checked,
+        checked: aggItem.checked, // Will be updated from displayedListItems
         baseUnit: aggItem.baseUnit,
         totalBaseQuantity: aggItem.totalBaseQuantity,
         isConvertible: isConvertible,
@@ -351,8 +356,8 @@ export default function ShoppingListPage() {
     }
     const listText = displayedListItems
       .map(item => {
-        const qtyStr = specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0
-          ? ``
+        const qtyStr = specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0 && item.unit !== ''
+          ? `` // For special units like "to taste" with 0 quantity, don't show quantity part
           : `${item.totalQuantity % 1 === 0 ? item.totalQuantity : item.totalQuantity.toFixed(2)} ${item.unit || 'unit(s)'}`;
         return `${item.name}${qtyStr ? ` (${qtyStr})` : ''}${item.checked ? ' (Purchased)' : ''}`;
       })
@@ -366,7 +371,7 @@ export default function ShoppingListPage() {
       await navigator.share(shareData);
       toast({ title: "List Shared!", description: "Your shopping list has been shared." });
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
+      if (err.name !== 'AbortError') { // Don't show error if user cancels share dialog
           toast({ title: "Share Failed", description: "Could not share the list.", variant: "destructive" });
       }
     }
@@ -514,3 +519,4 @@ export default function ShoppingListPage() {
     </div>
   );
 }
+
