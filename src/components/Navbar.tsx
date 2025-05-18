@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Utensils, Heart, ShoppingCart, Menu } from "lucide-react";
+import { Utensils, Heart, ShoppingCart, Menu, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { href: "/", label: "Home", icon: <Utensils className="h-5 w-5" /> },
@@ -14,6 +15,16 @@ const navItems = [
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -23,20 +34,32 @@ export function Navbar() {
           <span className="text-xl font-bold tracking-tight">Recipe Ready</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2">
-          {navItems.map((item) => (
-            <Button key={item.label} variant="ghost" asChild>
-              <Link href={item.href} className="flex items-center gap-2 text-foreground/80 hover:text-primary">
-                {item.icon}
-                {item.label}
-              </Link>
+        {/* Desktop Navigation & Theme Toggle */}
+        <div className="hidden md:flex items-center gap-2">
+          <nav className="flex items-center gap-2">
+            {navItems.map((item) => (
+              <Button key={item.label} variant="ghost" asChild>
+                <Link href={item.href} className="flex items-center gap-2 text-foreground/80 hover:text-primary">
+                  {item.icon}
+                  {item.label}
+                </Link>
+              </Button>
+            ))}
+          </nav>
+          {mounted && (
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+              {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-          ))}
-        </nav>
+          )}
+        </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-2">
+           {mounted && (
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+              {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          )}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
