@@ -374,11 +374,13 @@ export default function ShoppingListPage() {
   };
 
   const handlePrintList = () => {
-    window.print();
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
   };
 
   const handleShareList = async () => {
-    if (!navigator.share) {
+    if (typeof navigator.share !== 'function') {
       toast({ title: "Share API not supported", description: "Your browser does not support the Web Share API.", variant: "destructive" });
       return;
     }
