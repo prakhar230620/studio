@@ -207,7 +207,7 @@ export default function ShoppingListPage() {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'kg';
         } else {
-          displayQuantity = aggItem.totalBaseQuantity; // ensure quantity is not 0 if less than 1000g
+          displayQuantity = aggItem.totalBaseQuantity; 
           displayUnit = 'g'; 
         }
       } else if (aggItem.baseUnit === 'milliliter') {
@@ -216,7 +216,7 @@ export default function ShoppingListPage() {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'L';
         } else {
-          displayQuantity = aggItem.totalBaseQuantity; // ensure quantity is not 0 if less than 1000ml
+          displayQuantity = aggItem.totalBaseQuantity; 
           displayUnit = 'ml';
         }
       }
@@ -258,14 +258,13 @@ export default function ShoppingListPage() {
   };
 
   const handleRemoveAggregatedItem = (itemKey: string) => {
-    // This function now only affects the displayed list. Underlying data is not touched.
     const itemToRemove = displayedListItems.find(i => i.key === itemKey);
     setDisplayedListItems(prevList => prevList.filter(item => item.key !== itemKey));
     if (itemToRemove) {
         toast({ 
             title: "Item Removed from View", 
             description: `${itemToRemove.name} has been removed from the current aggregated list.`,
-            action: <Trash2 className="text-destructive" />
+            action: <Trash2 className="text-destructive h-5 w-5" />
         });
     }
   };
@@ -300,44 +299,40 @@ export default function ShoppingListPage() {
   };
 
   const handleClearCheckedAggregatedItems = () => {
-    // This function now only affects the displayed list.
     setDisplayedListItems(prevList => prevList.filter(item => !item.checked));
     toast({ 
         title: "Checked Items Cleared", 
         description: "Checked items removed from current aggregated view.",
-        action: <Trash2 className="text-destructive" />
+        action: <Trash2 className="text-destructive h-5 w-5" />
     });
   };
 
   const handleClearAllAggregatedItemsFromView = () => {
-     // This function now only affects the displayed list.
     setDisplayedListItems([]);
     toast({ 
         title: "Current List View Cleared", 
         description: "The aggregated list view is now empty.",
-        action: <Trash2 className="text-destructive" />
+        action: <Trash2 className="text-destructive h-5 w-5" />
     });
   };
   
-  // This function clears the *source* data from localStorage for a specific recipe title
   const handleDeleteRecipeItems = (recipeTitleToDelete: string) => {
     setAllShoppingListItems(prev => prev.filter(item => item.recipeTitle !== recipeTitleToDelete));
     setSelectedRecipeTitles(prev => prev.filter(title => title !== recipeTitleToDelete));
     toast({
       title: `Items for "${recipeTitleToDelete}" Deleted`,
       description: `All shopping list items for ${recipeTitleToDelete} have been removed.`,
-      action: <Trash2 className="text-destructive" />
+      action: <Trash2 className="text-destructive h-5 w-5" />
     });
   };
   
-  // This function clears the *source* data from localStorage
   const handleClearAllUnderlyingData = () => {
-    setAllShoppingListItems([]); // This will trigger re-aggregation to an empty list
-    setSelectedRecipeTitles([]); // Also clear selected recipe titles
+    setAllShoppingListItems([]); 
+    setSelectedRecipeTitles([]); 
     toast({ 
         title: "All Shopping Data Cleared", 
         description: "Your entire shopping list history is now empty.",
-        action: <Recycle className="text-destructive" />
+        action: <Recycle className="text-destructive h-5 w-5" />
     });
   };
 
@@ -358,7 +353,7 @@ export default function ShoppingListPage() {
       id: `manual-${Date.now()}`,
       name: newItemName.trim(),
       quantity: quantity,
-      unit: newItemUnit.trim() || 'unit', // Default to 'unit' if empty
+      unit: newItemUnit.trim() || 'unit', 
       checked: false, 
       recipeTitle: "Manually Added",
     };
@@ -374,7 +369,7 @@ export default function ShoppingListPage() {
     toast({ 
         title: "Item Added", 
         description: `${newItem.name} has been added to 'Manually Added' items.`,
-        action: <CheckCircle className="text-green-500" />
+        action: <CheckCircle className="text-green-500 h-5 w-5" />
     });
   };
 
@@ -390,7 +385,7 @@ export default function ShoppingListPage() {
     const listText = displayedListItems
       .map(item => {
         const qtyStr = specialUnits.includes(item.unit.toLowerCase()) && item.totalQuantity === 0 && item.unit !== ''
-          ? `` // For special units like "to taste" with 0 quantity, don't show quantity part
+          ? `` 
           : `${item.totalQuantity % 1 === 0 ? item.totalQuantity : item.totalQuantity.toFixed(2)} ${item.unit || 'unit(s)'}`;
         return `${item.name}${qtyStr ? ` (${qtyStr})` : ''}${item.checked ? ' (Purchased)' : ''}`;
       })
@@ -404,7 +399,7 @@ export default function ShoppingListPage() {
       await navigator.share(shareData);
       toast({ title: "List Shared!", description: "Your shopping list has been shared." });
     } catch (err: any) {
-      if (err.name !== 'AbortError') { // Don't show error if user cancels share dialog
+      if (err.name !== 'AbortError') { 
           toast({ title: "Share Failed", description: "Could not share the list.", variant: "destructive" });
       }
     }
@@ -529,7 +524,7 @@ export default function ShoppingListPage() {
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">List Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col sm:flex-row justify-center items-center gap-3">
+          <CardContent className="flex flex-col sm:flex-row justify-center items-center gap-3 p-4">
             <Button onClick={handlePrintList} variant="outline" className="w-full sm:w-auto">
               <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
@@ -583,3 +578,4 @@ export default function ShoppingListPage() {
   );
 }
 
+    
