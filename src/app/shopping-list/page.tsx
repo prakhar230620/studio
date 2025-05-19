@@ -179,7 +179,7 @@ export default function ShoppingListPage() {
 
     itemsToConsider.forEach(item => {
       const { baseQuantity, baseUnit } = getBaseEquivalent(item.quantity, item.unit);
-      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`; // Key includes base unit for correct aggregation
+      const key = `${item.name.toLowerCase().trim()}-${baseUnit}`; 
       
       if (internalAggregationMap.has(key)) {
         const existing = internalAggregationMap.get(key)!;
@@ -189,7 +189,7 @@ export default function ShoppingListPage() {
           name: item.name, 
           totalBaseQuantity: baseQuantity,
           baseUnit: baseUnit,
-          checked: false, // Default checked state for new aggregated items
+          checked: false, 
         });
       }
     });
@@ -200,9 +200,8 @@ export default function ShoppingListPage() {
       let displayUnit = aggItem.baseUnit;
       let isConvertible = false;
 
-      // Convert to larger units for display if applicable
       if (aggItem.baseUnit === 'gram') {
-        isConvertible = true; // g <-> kg
+        isConvertible = true; 
         if (aggItem.totalBaseQuantity >= 1000) {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'kg';
@@ -211,7 +210,7 @@ export default function ShoppingListPage() {
           displayUnit = 'g'; 
         }
       } else if (aggItem.baseUnit === 'milliliter') {
-        isConvertible = true; // ml <-> L
+        isConvertible = true; 
         if (aggItem.totalBaseQuantity >= 1000) {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'L';
@@ -220,14 +219,13 @@ export default function ShoppingListPage() {
           displayUnit = 'ml';
         }
       }
-      // Other base units (piece, can, pinch, etc.) are displayed as is
       
       displayableList.push({
         key,
         name: aggItem.name,
-        totalQuantity: parseFloat(displayQuantity.toFixed(2)), // Ensure 2 decimal places for display
+        totalQuantity: parseFloat(displayQuantity.toFixed(2)), 
         unit: displayUnit,
-        checked: aggItem.checked, // Will be updated from displayedListItems
+        checked: aggItem.checked, 
         baseUnit: aggItem.baseUnit,
         totalBaseQuantity: aggItem.totalBaseQuantity,
         isConvertible: isConvertible,
@@ -241,7 +239,6 @@ export default function ShoppingListPage() {
   const [displayedListItems, setDisplayedListItems] = useState<AggregatedShoppingListItem[]>([]);
 
   useEffect(() => {
-    // Preserve checked state if item already exists in displayedListItems
     setDisplayedListItems(prevDisplayed => {
         return aggregatedShoppingList.map(newItem => {
             const existingItem = prevDisplayed.find(oldItem => oldItem.key === newItem.key);
@@ -278,7 +275,7 @@ export default function ShoppingListPage() {
             if (item.unit === 'g') {
               newItem.unit = 'kg';
               newItem.totalQuantity = parseFloat((item.totalBaseQuantity / 1000).toFixed(2));
-            } else { // unit is 'kg'
+            } else { 
               newItem.unit = 'g';
               newItem.totalQuantity = item.totalBaseQuantity;
             }
@@ -286,7 +283,7 @@ export default function ShoppingListPage() {
             if (item.unit === 'ml') {
               newItem.unit = 'L';
               newItem.totalQuantity = parseFloat((item.totalBaseQuantity / 1000).toFixed(2));
-            } else { // unit is 'L'
+            } else { 
               newItem.unit = 'ml';
               newItem.totalQuantity = item.totalBaseQuantity;
             }
@@ -574,6 +571,7 @@ export default function ShoppingListPage() {
     </div>
   );
 }
+    
 
     
 
