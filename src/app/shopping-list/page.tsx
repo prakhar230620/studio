@@ -521,24 +521,6 @@ export default function ShoppingListPage() {
         </CardContent>
       </Card>
       
-      {displayedListItems.length > 0 && (
-        <Card className="w-full max-w-2xl mx-auto shadow-md shopping-list-page-actions-card hover:shadow-lg transition-shadow duration-300 ease-in-out">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-center">List Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col sm:flex-row justify-center items-center gap-3 p-4">
-            <Button onClick={handlePrintList} variant="outline" className="w-full sm:w-auto">
-              <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
-            </Button>
-            {isShareApiAvailable && (
-              <Button onClick={handleShareList} variant="outline" className="w-full sm:w-auto">
-                <Share2 className="mr-2 h-4 w-4" /> Share List
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       <ShoppingListDisplay 
         items={displayedListItems} 
         onUpdateItem={handleUpdateAggregatedItem}
@@ -548,6 +530,19 @@ export default function ShoppingListPage() {
         onToggleUnit={handleToggleUnit}
         className="hover:shadow-xl transition-shadow duration-300 ease-in-out"
       />
+
+      {displayedListItems.length > 0 && (
+        <div className="page-actions-buttons-container flex flex-col sm:flex-row justify-center items-center gap-3 pt-6">
+            <Button onClick={handlePrintList} variant="outline" className="w-full sm:w-auto">
+              <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
+            </Button>
+            {isShareApiAvailable && (
+              <Button onClick={handleShareList} variant="outline" className="w-full sm:w-auto">
+                <Share2 className="mr-2 h-4 w-4" /> Share List
+              </Button>
+            )}
+        </div>
+      )}
 
       {allShoppingListItems.length > 0 && (
         <div className="mt-8 flex justify-center clear-all-underlying-data-button-container">
@@ -579,5 +574,7 @@ export default function ShoppingListPage() {
     </div>
   );
 }
+
+    
 
     

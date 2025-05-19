@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -106,7 +107,7 @@
   body > footer, /* Main footer */
   .recipe-filter-card,
   .manual-add-item-card,
-  .shopping-list-page-actions-card, /* Card containing Print/Share buttons */
+  .page-actions-buttons-container, /* Container for Print/Share buttons */
   .shopping-list-footer-actions, /* CardFooter in ShoppingListDisplay containing Clear Checked/All */
   .clear-all-underlying-data-button-container, /* Container for the "Clear All Underlying Shopping Data" button */
   .shopping-list-item-actions /* Container for toggle unit and remove item buttons within each list item */
@@ -185,3 +186,6 @@
     text-decoration: none !important; /* Remove line-through for print if needed, or keep it */
   }
 }
+
+
+    
