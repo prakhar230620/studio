@@ -207,7 +207,8 @@ export default function ShoppingListPage() {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'kg';
         } else {
-          displayUnit = 'g'; // keep as grams if less than 1kg
+          displayQuantity = aggItem.totalBaseQuantity; // ensure quantity is not 0 if less than 1000g
+          displayUnit = 'g'; 
         }
       } else if (aggItem.baseUnit === 'milliliter') {
         isConvertible = true; // ml <-> L
@@ -215,7 +216,8 @@ export default function ShoppingListPage() {
           displayQuantity = aggItem.totalBaseQuantity / 1000;
           displayUnit = 'L';
         } else {
-          displayUnit = 'ml'; // keep as ml if less than 1L
+          displayQuantity = aggItem.totalBaseQuantity; // ensure quantity is not 0 if less than 1000ml
+          displayUnit = 'ml';
         }
       }
       // Other base units (piece, can, pinch, etc.) are displayed as is
@@ -223,7 +225,7 @@ export default function ShoppingListPage() {
       displayableList.push({
         key,
         name: aggItem.name,
-        totalQuantity: displayQuantity,
+        totalQuantity: parseFloat(displayQuantity.toFixed(2)), // Ensure 2 decimal places for display
         unit: displayUnit,
         checked: aggItem.checked, // Will be updated from displayedListItems
         baseUnit: aggItem.baseUnit,
@@ -276,7 +278,7 @@ export default function ShoppingListPage() {
           if (item.baseUnit === 'gram') {
             if (item.unit === 'g') {
               newItem.unit = 'kg';
-              newItem.totalQuantity = item.totalBaseQuantity / 1000;
+              newItem.totalQuantity = parseFloat((item.totalBaseQuantity / 1000).toFixed(2));
             } else { // unit is 'kg'
               newItem.unit = 'g';
               newItem.totalQuantity = item.totalBaseQuantity;
@@ -284,7 +286,7 @@ export default function ShoppingListPage() {
           } else if (item.baseUnit === 'milliliter') {
             if (item.unit === 'ml') {
               newItem.unit = 'L';
-              newItem.totalQuantity = item.totalBaseQuantity / 1000;
+              newItem.totalQuantity = parseFloat((item.totalBaseQuantity / 1000).toFixed(2));
             } else { // unit is 'L'
               newItem.unit = 'ml';
               newItem.totalQuantity = item.totalBaseQuantity;
@@ -314,6 +316,17 @@ export default function ShoppingListPage() {
         title: "Current List View Cleared", 
         description: "The aggregated list view is now empty.",
         action: <Trash2 className="text-destructive" />
+    });
+  };
+  
+  // This function clears the *source* data from localStorage for a specific recipe title
+  const handleDeleteRecipeItems = (recipeTitleToDelete: string) => {
+    setAllShoppingListItems(prev => prev.filter(item => item.recipeTitle !== recipeTitleToDelete));
+    setSelectedRecipeTitles(prev => prev.filter(title => title !== recipeTitleToDelete));
+    toast({
+      title: `Items for "${recipeTitleToDelete}" Deleted`,
+      description: `All shopping list items for ${recipeTitleToDelete} have been removed.`,
+      action: <Trash2 className="text-destructive" />
     });
   };
   
@@ -416,19 +429,48 @@ export default function ShoppingListPage() {
             <ListFilter className="h-5 w-5" /> Filter Recipes for Shopping List
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-1">
           {uniqueRecipeTitles.length > 0 ? uniqueRecipeTitles.map(title => (
-            <div key={title} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
-              <Checkbox
-                id={`recipe-select-${title.replace(/\s+/g, '-')}`}
-                checked={selectedRecipeTitles.includes(title)}
-                onCheckedChange={(checked) => handleRecipeTitleSelectionChange(title, !!checked)}
-              />
-              <Label htmlFor={`recipe-select-${title.replace(/\s+/g, '-')}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-grow">
-                {title}
-              </Label>
+            <div key={title} className="flex items-center justify-between space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+              <div className="flex items-center space-x-3 flex-grow">
+                <Checkbox
+                  id={`recipe-select-${title.replace(/\s+/g, '-')}`}
+                  checked={selectedRecipeTitles.includes(title)}
+                  onCheckedChange={(checked) => handleRecipeTitleSelectionChange(title, !!checked)}
+                  aria-label={`Select recipe ${title} for shopping list`}
+                />
+                <Label 
+                  htmlFor={`recipe-select-${title.replace(/\s+/g, '-')}`} 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-grow truncate"
+                  title={title}
+                >
+                  {title}
+                </Label>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive/80 flex-shrink-0">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete all items for recipe {title}</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete items for "{title}"?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action will permanently remove all shopping list items associated with the recipe "{title}" from your storage. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteRecipeItems(title)}>
+                      Yes, Delete Items
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-          )) : <p className="text-sm text-muted-foreground text-center">No recipes added to shopping list yet.</p>}
+          )) : <p className="text-sm text-muted-foreground text-center py-2">No recipes added to shopping list yet.</p>}
         </CardContent>
       </Card>
 
