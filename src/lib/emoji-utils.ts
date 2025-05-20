@@ -3,70 +3,233 @@
 
 const ingredientEmojiMap: Record<string, string> = {
   // Fruits
-  apple: '🍎', banana: '🍌', orange: '🍊', lemon: '🍋', lime: '🍋', // Using same for lime
-  grape: '🍇', strawberry: '🍓', blueberry: '🫐', raspberry: '🍓', // Using same for raspberry
-  pineapple: '🍍', mango: '🥭', watermelon: '🍉', peach: '🍑', pear: '🍐',
-  cherry: '🍒', plum: '🍑', // Using peach for plum
-  kiwi: '🥝', coconut: '🥥', fig: '🍑', // Using peach for fig as placeholder
-  pomegranate: '🍓', // Using strawberry as placeholder
+  apple: '🍎', apples: '🍎',
+  banana: '🍌', bananas: '🍌',
+  orange: '🍊', oranges: '🍊',
+  lemon: '🍋', lemons: '🍋',
+  lime: '🍋', limes: '🍋', // Using same for lime
+  grape: '🍇', grapes: '🍇',
+  strawberry: '🍓', strawberries: '🍓',
+  blueberry: '🫐', blueberries: '🫐',
+  raspberry: '🍓', raspberries: '🍓', // Using strawberry as proxy
+  blackberry: '🫐', blackberries: '🫐', // Using blueberry as proxy
+  pineapple: '🍍', pineapples: '🍍',
+  mango: '🥭', mangoes: '🥭',
+  watermelon: '🍉', watermelons: '🍉',
+  peach: '🍑', peaches: '🍑',
+  pear: '🍐', pears: '🍐',
+  cherry: '🍒', cherries: '🍒',
+  plum: '🍑', plums: '🍑', // Using peach for plum
+  kiwi: '🥝', kiwis: '🥝',
+  coconut: '🥥', coconuts: '🥥',
+  fig: '🍑', figs: '🍑', // Using peach for fig as placeholder
+  pomegranate: '🍓', pomegranates: '🍓', // Using strawberry as placeholder
+  avocado: '🥑', avocados: '🥑',
+  papaya: '🥭', // Using mango as proxy
+  guava: '🍈', // Using melon as proxy
+  melon: '🍈',
+  cantaloupe: '🍈',
+  honeydew: '🍈',
+  apricot: '🍑',
+  nectarine: '🍑',
+  passionfruit: '🍓', // Placeholder
+  dragonfruit: '🐉', // Placeholder text, actual emoji might be different
+
   // Vegetables
-  tomato: '🍅', potato: '🥔', onion: '🧅', garlic: '🧄', carrot: '🥕',
-  broccoli: '🥦', spinach: '🥬', lettuce: '🥬', cucumber: '🥒',
-  bellpepper: '🫑', 'bell pepper': '🫑', pepper: '🌶️', chili: '🌶️', corn: '🌽', peas: '🫛',
-  mushroom: '🍄', eggplant: '🍆', aubergine: '🍆', avocado: '🥑', cabbage: '🥬',
-  pumpkin: '🎃', zucchini: '🥒', cauliflower: '🥦', // Using broccoli as proxy
+  tomato: '🍅', tomatoes: '🍅',
+  potato: '🥔', potatoes: '🥔',
+  onion: '🧅', onions: '🧅',
+  garlic: '🧄',
+  carrot: '🥕', carrots: '🥕',
+  broccoli: '🥦',
+  spinach: '🥬',
+  lettuce: '🥬',
+  cucumber: '🥒', cucumbers: '🥒',
+  bellpepper: '🫑', 'bell pepper': '🫑', 'capsicum': '🫑',
+  pepper: '🌶️', // General pepper
+  chili: '🌶️', 'chilli': '🌶️', 'green chili': '🌶️', 'red chili': '🌶️', 'jalapeno': '🌶️',
+  corn: '🌽',
+  pea: '🫛', peas: '🫛', 'green peas': '🫛',
+  mushroom: '🍄', mushrooms: '🍄',
+  eggplant: '🍆', 'aubergine': '🍆',
+  cabbage: '🥬',
+  pumpkin: '🎃',
+  zucchini: '🥒',
+  cauliflower: '🥦', // Using broccoli as proxy
   sweetpotato: '🍠', 'sweet potato': '🍠',
   beetroot: '🍠', // Using sweet potato as proxy
   radish: '🥕', // Using carrot as proxy
   celery: '🥬', // Using lettuce/cabbage as proxy
-  asparagus: ' asparagus ', // Placeholder text to avoid conflict, actual emoji might be 🌿 or similar
+  asparagus: '🌿', // Generic herb/plant for asparagus
   kale: '🥬',
   leek: '🥬',
   artichoke: ' artichoke ', // Placeholder
-  // Grains & Staples
-  flour: '🌾', rice: '🍚', pasta: '🍝', bread: '🍞', noodle: '🍜',
-  oat: '🥣', oatmeal: '🥣', quinoa: '🍚', couscous: '🍚',
-  cornmeal: '🌽', semolina: '🌾', barley: '🌾',
-  sugar: '🍬', salt: '🧂', 
-  'olive oil': '🫒', 'vegetable oil': '🛢️', 'coconut oil': '🥥', oil: '🛢️', 
-  vinegar: '🍾',
+  brusselsprout: '🥬', 'brussels sprout': '🥬',
+  okra: '🟢', // Green circle
+  turnip: ' turnips ', // Placeholder
+  parsnip: '🥕', // Using carrot
+  yam: '🍠',
+  squash: '🎃', // Using pumpkin for general squash
+
+  // Grains, Pasta, Bread & Staples
+  flour: '🌾', 'all-purpose flour': '🌾', 'wheat flour': '🌾', 'maida': '🌾',
+  rice: '🍚', 'basmati rice': '🍚', 'jasmine rice': '🍚', 'brown rice': '🍚',
+  pasta: '🍝', 'spaghetti': '🍝', 'penne': '🍝', 'macaroni': '🍝', 'fettuccine': '🍝',
+  bread: '🍞', 'white bread': '🍞', 'brown bread': '🍞', 'baguette': '🥖', 'bun': '🍔',
+  noodle: '🍜', noodles: '🍜', 'ramen noodles': '🍜', 'egg noodles': '🍜',
+  oat: '🥣', oats: '🥣', oatmeal: '🥣',
+  quinoa: '🍚', // Using rice as proxy
+  couscous: '🍚', // Using rice as proxy
+  cornmeal: '🌽',
+  semolina: '🌾', 'sooji': '🌾', 'suji': '🌾',
+  barley: '🌾',
+  sugar: '🍬', 'white sugar': '🍬', 'brown sugar': '🟤', 'caster sugar': '🍬', 'icing sugar': '🍬', 'powdered sugar': '🍬',
+  salt: '🧂', 'black salt': '🧂',
+  'olive oil': '🫒', 'extra virgin olive oil': '🫒',
+  'vegetable oil': '🛢️', 'sunflower oil': '🌻', 'canola oil': '🛢️', 'corn oil': '🌽', 'sesame oil': '🌰',
+  'coconut oil': '🥥',
+  oil: '🛢️', // Generic oil
+  vinegar: '🍾', 'apple cider vinegar': '🍎', 'white vinegar': '🍾', 'balsamic vinegar': '🍾',
+  yeast: '🧱', // Brown square as placeholder
+
   // Dairy & Alternatives
-  milk: '🥛', cheese: '🧀', butter: '🧈', yogurt: '🥣', cream: '🥛',
-  egg: '🥚', tofu: '⬜', paneer: '🧀', // Using cheese for paneer
-  'almond milk': '🥛', 'soy milk': '🥛', 'oat milk': '🥛',
-  // Meats & Proteins
-  chicken: '🐔', beef: '🥩', 'ground beef': '🥩', pork: '🥓', bacon: '🥓',
-  fish: '🐟', salmon: '🐟', tuna: '🐟', cod: '🐟', shrimp: '🦐', prawn: '🦐',
-  lamb: '🐑', turkey: '🦃', sausage: '🌭',
+  milk: '🥛', 'cow milk': '🥛',
+  cheese: '🧀', 'cheddar cheese': '🧀', 'mozzarella cheese': '🧀', 'parmesan cheese': '🧀', 'feta cheese': '🧀', 'cottage cheese': '🧀', 'cream cheese': '🧀',
+  butter: '🧈',
+  yogurt: '🥣', 'yoghurt': '🥣', 'greek yogurt': '🥣',
+  cream: '🥛', 'heavy cream': '🥛', 'sour cream': '🥣', 'whipping cream': '🥛',
+  egg: '🥚', eggs: '🥚',
+  tofu: '⬜', // White square
+  paneer: '🧀', // Using cheese for paneer
+  'almond milk': '🥛', 'soy milk': '🥛', 'oat milk': '🥛', 'coconut milk': '🥥',
+  ghee: '🧈', // Using butter
+
+  // Meats, Poultry & Proteins
+  chicken: '🐔', 'chicken breast': '🐔', 'chicken thigh': '🐔', 'ground chicken': '🐔',
+  beef: '🥩', 'ground beef': '🥩', 'steak': '🥩',
+  pork: '🥓', 'pork chop': '🥩', 'ground pork': '🥓',
+  bacon: '🥓',
+  fish: '🐟', 'salmon': '🐟', 'tuna': '🐟', 'cod': '🐟', 'tilapia': '🐟',
+  shrimp: '🦐', prawn: '🦐',
+  lamb: '🐑', 'ground lamb': '🐑',
+  turkey: '🦃', 'ground turkey': '🦃',
+  sausage: '🌭',
+  ham: '🍖',
+  crab: '🦀',
+  lobster: '🦞',
+  duck: '🦆',
+
   // Spices & Herbs (generic for many, specific for some)
-  parsley: '🌿', basil: '🌿', oregano: '🌿', cilantro: '🌿', coriander: '🌿',
-  mint: '🌿', rosemary: '🌿', thyme: '🌿', dill: '🌿', sage: '🌿',
-  cumin: '🌿', turmeric: '🟡', ginger: '🫚', cinnamon: '🌿', nutmeg: '🌰',
-  clove: '🌿', cardamom: '🌿', saffron: '🌼', paprika: '🌶️',
-  'black pepper': '⚫', // Generic black circle for black pepper
-  bayleaf: '🌿', 'bay leaf': '🌿',
+  parsley: '🌿',
+  basil: '🌿', 'holy basil': '🌿', 'tulsi': '🌿',
+  oregano: '🌿',
+  cilantro: '🌿', coriander: '🌿', 'coriander leaves': '🌿', 'coriander powder': '🌿',
+  mint: '🌿',
+  rosemary: '🌿',
+  thyme: '🌿',
+  dill: '🌿',
+  sage: '🌿',
+  cumin: '🌿', 'cumin powder': '🌿', 'cumin seeds': '🌿', 'jeera': '🌿',
+  turmeric: '🟡', 'turmeric powder': '🟡', 'haldi': '🟡',
+  ginger: '🫚',
+  cinnamon: '🌿', 'cinnamon stick': '🌿', 'cinnamon powder': '🌿',
+  nutmeg: '🌰', // Using nut for nutmeg
+  clove: '🌿', 'cloves': '🌿',
+  cardamom: '🌿', 'green cardamom': '🌿', 'black cardamom': '🌿', 'elaichi': '🌿',
+  saffron: '🌼', 'kesar': '🌼',
+  paprika: '🌶️',
+  'black pepper': '⚫', 'peppercorns': '⚫', 'kali mirch': '⚫',
+  'white pepper': '⚪',
+  bayleaf: '🌿', 'bay leaf': '🌿', 'tej patta': '🌿',
+  'star anise': '⭐',
+  'curry leaves': '🌿', 'curry leaf': '🌿',
+  'garam masala': '🔥', // Fire for garam masala mix
+  'chili powder': '🌶️', 'red chili powder': '🌶️',
+  'mustard seeds': '🟡', 'rai': '🟡',
+  'fenugreek seeds': '🌿', 'methi seeds': '🌿',
+  'fennel seeds': '🌿', 'saunf': '🌿',
+  'asafoetida': '💨', 'hing': '💨', // Puff of smoke
+
   // Nuts & Seeds
-  almond: '🌰', peanut: '🥜', walnut: '🌰', cashew: '🌰',
-  pistachio: '🌰', hazelnut: '🌰', pecan: '🌰',
-  sesameseed: '🌰', 'sesame seed': '🌰',
-  sunflowerseed: '🌻', 'sunflower seed': '🌻',
-  chiaseed: '🫘', 'chia seed': '🫘', // Using bean for seeds
-  flaxseed: '🫘', 'flax seed': '🫘',
-  poppyseed: '🫘', 'poppy seed': '🫘',
-  pumpkinseed: '🎃', 'pumpkin seed': '🎃',
+  almond: '🌰', almonds: '🌰',
+  peanut: '🥜', peanuts: '🥜',
+  walnut: '🌰', walnuts: '🌰',
+  cashew: '🌰', cashews: '🌰',
+  pistachio: '🌰', pistachios: '🌰',
+  hazelnut: '🌰', hazelnuts: '🌰',
+  pecan: '🌰', pecans: '🌰',
+  sesameseed: '🌰', 'sesame seed': '🌰', 'sesame seeds': '🌰', 'til': '🌰',
+  sunflowerseed: '🌻', 'sunflower seed': '🌻', 'sunflower seeds': '🌻',
+  chiaseed: '🫘', 'chia seed': '🫘', 'chia seeds': '🫘', // Using bean for seeds
+  flaxseed: '🫘', 'flax seed': '🫘', 'flax seeds': '🫘',
+  poppyseed: '🫘', 'poppy seed': '🫘', 'poppy seeds': '🫘',
+  pumpkinseed: '🎃', 'pumpkin seed': '🎃', 'pumpkin seeds': '🎃',
+
   // Legumes
-  lentil: '🫘', chickpea: '🫘', 'kidney bean': '🫘', kidneybean: '🫘',
-  'black bean': '🫘', blackbean: '🫘', 'soy bean': '🫘', edamame: '🫛',
-  // Other
-  water: '💧', chocolate: '🍫', 'cocoa powder': '🍫', coffee: '☕', tea: '🫖',
-  honey: '🍯', 'maple syrup': '🍁', syrup: '🍯',
-  wine: '🍷', beer: '🍺', 'soy sauce': '🍾', mustard: '💛', ketchup: '🍅',
-  mayonnaise: '🥚', jam: '🍓', jelly: '🍇', broth: '🥣', stock: '🥣',
-  // Common recipe keywords that are not single ingredients
-  curry: '🍛', soup: '🥣', salad: '🥗', sandwich: '🥪',
-  pizza: '🍕', burger: '🍔', taco: '🌮', cake: '🍰', pie: '🥧',
-  cookie: '🍪', icecream: '🍨', smoothie: '🥤', juice: '🧃',
-  sauce: '🥫',
+  lentil: '🫘', lentils: '🫘', 'red lentil': '🫘', 'green lentil': '🫘', 'brown lentil': '🫘', 'masoor dal': '🫘', 'moong dal': '🫘', 'toor dal': '🫘', 'chana dal': '🫘',
+  chickpea: '🫘', chickpeas: '🫘', 'garbanzo beans': '🫘', 'chana': '🫘', 'kabuli chana': '🫘',
+  'kidney bean': '🫘', kidneybean: '🫘', 'kidney beans': '🫘', 'rajma': '🫘',
+  'black bean': '🫘', blackbean: '🫘', 'black beans': '🫘',
+  'soy bean': '🫘', 'soybean': '🫘', 'soybeans': '🫘',
+  edamame: '🫛',
+  'lima beans': '🫘',
+  'pinto beans': '🫘',
+
+  // Other Food Items & Condiments
+  water: '💧',
+  chocolate: '🍫', 'dark chocolate': '🍫', 'milk chocolate': '🍫', 'white chocolate': '⬜', // White square for white chocolate
+  'cocoa powder': '🍫',
+  coffee: '☕', 'coffee beans': '☕',
+  tea: '🫖', 'tea leaves': '🫖', 'green tea': '🍵', 'black tea': '☕',
+  honey: '🍯',
+  'maple syrup': '🍁',
+  syrup: '🍯', // Generic syrup
+  wine: '🍷', 'red wine': '🍷', 'white wine': '🥂',
+  beer: '🍺',
+  'soy sauce': '🍾',
+  mustard: '💛', 'mustard paste': '💛',
+  ketchup: '🍅',
+  mayonnaise: '🥚', 'mayo': '🥚',
+  jam: '🍓', // Strawberry for generic jam
+  jelly: '🍇', // Grape for generic jelly
+  broth: '🥣', 'chicken broth': '🐔', 'vegetable broth': '🥕', 'beef broth': '🥩',
+  stock: '🥣',
+  vanilla: '🍦', 'vanilla extract': '🍦', // Ice cream for vanilla
+  gelatin: '🍮', // Custard/pudding for gelatin
+  jaggery: '🟤', 'gur': '🟤', // Brown circle for jaggery
+  breadcrumbs: '🍞',
+  pickle: '🥒', pickles: '🥒',
+  olives: '🫒', 'black olives': '⚫', 'green olives': '🟢',
+
+  // Common recipe keywords that are not single ingredients (less priority, matched if specific ingredient isn't)
+  curry: '🍛',
+  soup: '🥣',
+  salad: '🥗',
+  sandwich: '🥪',
+  pizza: '🍕',
+  burger: '🍔',
+  taco: '🌮',
+  cake: '🍰',
+  pie: '🥧',
+  cookie: '🍪', cookies: '🍪',
+  icecream: '🍨', 'ice cream': '🍨',
+  smoothie: '🥤',
+  juice: '🧃',
+  sauce: '🥫', // Generic sauce
+  'pasta sauce': '🍝',
+  'pizza sauce': '🍕',
+  dressing: '🥗', // Salad for dressing
+  gravy: '🥣',
+  stew: '🥘',
+  casserole: '🥘',
+  wrap: '🌯',
+  roll: '🌯', // Spring roll, kathi roll etc.
+  biryani: '🍚', // Rice for biryani
+  korma: '🍛',
+  tikka: '🍢', // Skewer for tikka
+  kebab: '🍢',
+  'french fries': '🍟',
+  chips: '🥔', // Potato for chips
 };
 
 // Order of keywords matters if one is a substring of another.
@@ -74,25 +237,26 @@ const ingredientEmojiMap: Record<string, string> = {
 const sortedEmojiKeywords = Object.keys(ingredientEmojiMap).sort((a, b) => b.length - a.length);
 
 export function getEmojiForIngredient(ingredientName: string): string {
-  const nameLower = ingredientName.toLowerCase();
+  const nameLower = ingredientName.toLowerCase().replace(/,/g, ''); // Remove commas for better matching
+  
+  // Prioritize exact or near-exact matches for longer phrases first
   for (const keyword of sortedEmojiKeywords) {
-    // Use word boundaries for more precise matching if the keyword is a common short word
-    // For example, to distinguish "oil" from "boil"
-    const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    // Regex for whole word matching (or phrase matching)
+    // For single word keywords, use word boundaries. For multi-word, match as phrase.
+    const pattern = keyword.includes(' ') ? `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b` : `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`;
+    const regex = new RegExp(pattern, 'i');
     if (regex.test(nameLower)) {
       return ingredientEmojiMap[keyword];
     }
-    // Fallback to includes for multi-word keywords or less common words
-    if (keyword.includes(' ') && nameLower.includes(keyword)) {
-        return ingredientEmojiMap[keyword];
-    }
   }
-  // If no specific match with word boundaries, try a general includes for broader matching
-  // This is a secondary check, as the primary check (with word boundaries) is more precise.
+
+  // Fallback: If no specific match, try a general includes for broader matching, still prioritizing longer keywords
   for (const keyword of sortedEmojiKeywords) {
-      if(nameLower.includes(keyword)) {
+      if (nameLower.includes(keyword)) {
           return ingredientEmojiMap[keyword];
       }
   }
   return ''; // No emoji if no match
 }
+
+    
