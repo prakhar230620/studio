@@ -5,19 +5,18 @@
 import type React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"; // CardDescription removed as not used
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Plus, Minus, ChefHat } from "lucide-react"; // ShoppingCart, CheckCircle removed
-import type { Recipe } from '@/lib/types'; // Ingredient, ShoppingListItem removed, not directly used here but Recipe uses Ingredient
+import { Heart, Plus, Minus, ChefHat } from "lucide-react";
+import type { Recipe } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
-// useLocalStorage removed, not used here
+import { getEmojiForIngredient } from '@/lib/emoji-utils';
 
 interface RecipeDisplayProps {
   recipe: Recipe;
-  // onAddToShoppingList: (items: ShoppingListItem[]) => void; // Removed
   onToggleFavorite: (recipe: Recipe) => void;
 }
 
@@ -36,17 +35,15 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
     const scaleFactor = currentServings / recipe.baseServings;
     return recipe.ingredients.map(ing => ({
       ...ing,
-      quantity: parseFloat((ing.originalQuantity * scaleFactor).toFixed(2)), // Keep 2 decimal places
+      quantity: parseFloat((ing.originalQuantity * scaleFactor).toFixed(2)), 
     }));
   }, [recipe.ingredients, currentServings, recipe.baseServings]);
 
   const handleServingsChange = (newServings: number) => {
-    if (newServings > 0 && newServings <= 100) { // Max 100 servings
+    if (newServings > 0 && newServings <= 100) { 
       setCurrentServings(newServings);
     }
   };
-
-  // handleAddAllToShoppingList function removed
 
   const handleToggleFavorite = () => {
     const newFavoriteStatus = !isFavorited;
@@ -64,7 +61,10 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-xl mt-8 animate-fadeIn">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold text-primary">{recipe.title}</CardTitle>
+        <CardTitle className="text-3xl font-bold text-primary flex items-center justify-center">
+          <span role="img" aria-label="recipe plate emoji" className="mr-3 text-4xl">🍽️</span>
+          {recipe.title}
+        </CardTitle>
         {recipe.imageUrl && (
           <div className="mt-4 relative w-full h-64 rounded-lg overflow-hidden shadow-md">
             <Image 
@@ -73,6 +73,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
               layout="fill" 
               objectFit="cover" 
               className="transform hover:scale-105 transition-transform duration-300 ease-in-out"
+              data-ai-hint="recipe food"
             />
           </div>
         )}
@@ -106,13 +107,20 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
         <div>
           <h3 className="text-xl font-semibold mb-3 text-foreground/90">Ingredients</h3>
           <ul className="list-disc list-inside space-y-2 pl-2 text-foreground/80">
-            {adjustedIngredients.map((ing, index) => (
-              <li key={index} className="text-base">
-                {ing.quantity > 0 ? `${ing.quantity} ` : ""}
-                {ing.unit ? `${ing.unit} ` : ""}
-                {ing.name}
-              </li>
-            ))}
+            {adjustedIngredients.map((ing, index) => {
+              const emoji = getEmojiForIngredient(ing.name);
+              return (
+                <li key={index} className="text-base flex items-center">
+                  {emoji && <span role="img" aria-label={`${ing.name} emoji`} className="mr-2 w-5 text-center text-lg">{emoji}</span>}
+                  {!emoji && <span className="mr-2 w-5 text-center"></span>} {/* Placeholder for alignment */}
+                  <span>
+                    {ing.quantity > 0 ? `${ing.quantity} ` : ""}
+                    {ing.unit ? `${ing.unit} ` : ""}
+                    {ing.name}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -127,12 +135,11 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-center gap-4 p-6 border-t"> {/* Centered the favorite button */}
+      <CardFooter className="flex flex-col sm:flex-row justify-center gap-4 p-6 border-t">
         <Button variant={isFavorited ? "secondary" : "outline"} onClick={handleToggleFavorite} className="w-full sm:w-auto text-base py-3">
           <Heart className={`mr-2 h-5 w-5 ${isFavorited ? 'text-red-500 fill-red-500' : ''}`} />
           {isFavorited ? 'Favorited' : 'Add to Favorites'}
         </Button>
-        {/* Add to Shopping List Button Removed */}
       </CardFooter>
     </Card>
   );
