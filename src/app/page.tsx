@@ -9,9 +9,8 @@ import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { handleGenerateRecipeAction } from '@/lib/actions';
 import type { Recipe } from '@/lib/types';
 import useLocalStorage from '@/hooks/useLocalStorage';
-// Alert components are not used here anymore if error handling is solely in RecipeForm
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-// import { Terminal } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function HomePage() {
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
@@ -23,6 +22,7 @@ export default function HomePage() {
       if ('error' in data) {
         console.error("Error from action:", data.error);
         // Error is displayed via RecipeForm's error prop
+        setCurrentRecipe(null); // Ensure form is shown on error
       } else {
         const updatedRecipe = { ...data, isFavorite: favorites.some(fav => fav.id === data.id) };
         setCurrentRecipe(updatedRecipe);
@@ -30,19 +30,16 @@ export default function HomePage() {
     },
     onError: (error) => {
       console.error("Mutation error:", error);
+      setCurrentRecipe(null); // Ensure form is shown on error
        // Error is displayed via RecipeForm's error prop
     }
   });
 
   const handleFormSubmit = async (data: RecipeFormValues) => {
-    setCurrentRecipe(null); // Clear previous recipe
+    // setCurrentRecipe(null); // Don't clear here, onSuccess will handle it or error will show form
     
     let detailedPrompt = data.mainPrompt;
 
-    // RecipeName is removed from form, so this block is no longer needed.
-    // if (data.recipeName) {
-    //   detailedPrompt += `\nThe recipe should ideally be titled something like or related to: "${data.recipeName}".`;
-    // }
     if (data.servings) {
       detailedPrompt += `\nIt absolutely must serve ${data.servings} people. The ingredients listed should be for this many servings. Ensure the 'servings' field in your output correctly reflects this number.`;
     }
@@ -80,19 +77,34 @@ export default function HomePage() {
     }
   };
 
+  const handleBackToForm = () => {
+    setCurrentRecipe(null);
+    // Reset mutation state if needed, though usually it resets on new mutate call
+    // mutation.reset(); // if you want to clear error messages immediately
+  };
+
   return (
     <div className="flex flex-col items-center space-y-8 py-8">
-      <RecipeForm 
-        onRecipeGenerated={(recipe) => setCurrentRecipe(recipe)} // This prop might not be needed if RecipeForm directly calls onSubmitPrompt
-        isLoading={mutation.isPending}
-        onSubmitPrompt={handleFormSubmit}
-        error={mutation.isError ? (mutation.error as Error).message : (mutation.data && 'error' in mutation.data ? mutation.data.error : null)}
-      />
-      
-      {currentRecipe && (
-        <RecipeDisplay 
-          recipe={currentRecipe} 
-          onToggleFavorite={handleToggleFavorite}
+      {currentRecipe && !mutation.isPending && !(mutation.data && 'error' in mutation.data) ? (
+        <div className="w-full max-w-3xl">
+          <RecipeDisplay 
+            recipe={currentRecipe} 
+            onToggleFavorite={handleToggleFavorite}
+          />
+          <Button 
+            onClick={handleBackToForm} 
+            variant="outline" 
+            className="mt-8 w-full sm:w-auto flex items-center justify-center"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Create Another Recipe
+          </Button>
+        </div>
+      ) : (
+        <RecipeForm 
+          isLoading={mutation.isPending}
+          onSubmitPrompt={handleFormSubmit}
+          error={mutation.isError ? (mutation.error as Error).message : (mutation.data && 'error' in mutation.data ? mutation.data.error : null)}
         />
       )}
     </div>
