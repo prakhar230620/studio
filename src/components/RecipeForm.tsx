@@ -59,7 +59,7 @@ const dietaryOptions = [
   { id: "paleo", label: "Paleo", icon: Bone },
   { id: "low-carb", label: "Low-Carb", icon: Sprout }, 
   { id: "nut-free", label: "Nut-Free", icon: Shrub }, 
-  { id: "soy-free", label: "Soy-Free", icon: Sprout }, // Changed icon
+  { id: "soy-free", label: "Soy-Free", icon: Sprout },
   { id: "non-vegetarian", label: "Non-Vegetarian", icon: Drumstick },
   { id: "egg-free", label: "Egg-Free", icon: Feather }, 
   { id: "shellfish-free", label: "Shellfish-Free", icon: Shell },
@@ -80,12 +80,12 @@ const cuisineOptions: Array<{ id: string; label: string; icon?: React.ElementTyp
   { id: "chinese", label: "Chinese", flagEmoji: "🇨🇳", icon: Sprout },
   { id: "thai", label: "Thai", flagEmoji: "🇹🇭", icon: Sprout },
   { id: "japanese", label: "Japanese", flagEmoji: "🇯🇵", icon: Fish },
-  { id: "mediterranean", label: "Mediterranean", icon: Leaf, flagEmoji: "🇬🇷" }, // Added a representative flag
+  { id: "mediterranean", label: "Mediterranean", icon: Leaf, flagEmoji: "🇬🇷" },
   { id: "french", label: "French", flagEmoji: "🇫🇷", icon: Croissant },
   { id: "american", label: "American", flagEmoji: "🇺🇸", icon: Beef },
-  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout, flagEmoji: "🇸🇦" }, // Added a representative flag
+  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout, flagEmoji: "🇸🇦" },
   { id: "african", label: "African", icon: Sprout, flagEmoji: "🌍" }, 
-  { id: "caribbean", label: "Caribbean", icon: Fish, flagEmoji: "🇯🇲" }, // Added a representative flag
+  { id: "caribbean", label: "Caribbean", icon: Fish, flagEmoji: "🇯🇲" },
   { id: "greek", label: "Greek", flagEmoji: "🇬🇷", icon: Leaf },
   { id: "spanish", label: "Spanish", flagEmoji: "🇪🇸", icon: Fish },
   { id: "vietnamese", label: "Vietnamese", flagEmoji: "🇻🇳", icon: Sprout },
@@ -156,7 +156,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
       name={fieldName as any} 
       render={() => (
         <FormItem>
-          <div className="flex flex-wrap gap-2 py-2"> {/* Changed to flex-wrap and gap-2 */}
+          <div className="flex flex-wrap gap-2 py-2">
             {options.map((item) => {
               const IconComponent = item.icon;
               return (
@@ -168,7 +168,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                   return (
                     <FormItem 
                       key={item.id} 
-                      className="flex flex-row items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors duration-200 ease-in-out cursor-pointer" // Compacted padding, rounded-md
+                      className="flex flex-row items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors duration-200 ease-in-out cursor-pointer"
                     >
                       <FormControl>
                         <Checkbox
@@ -205,6 +205,168 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     />
   );
 
+  const preferenceCategories = [
+    { id: "servings", label: "Servings", icon: Users, content: (
+      <FormField
+        control={form.control}
+        name="servings"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel htmlFor="servings-input" className="font-semibold flex items-center gap-1 sr-only">Number of Servings</FormLabel>
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  const currentValue = typeof field.value === 'number' ? field.value : parseInt(String(field.value), 10) || 2;
+                  if (currentValue > 1) {
+                    form.setValue("servings", currentValue - 1, { shouldValidate: true });
+                  }
+                }}
+                disabled={watchedServings <= 1}
+                aria-label="Decrease servings"
+                className="hover:bg-accent/10 transition-colors"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <FormControl>
+                <Input
+                  id="servings-input"
+                  type="number"
+                  min="1"
+                  {...field}
+                  onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "") {
+                        field.onChange(""); 
+                      } else {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue) && numValue >=1) {
+                            field.onChange(numValue);
+                        }
+                      }
+                  }}
+                  onBlur={(e) => { 
+                    const value = parseInt(String(field.value),10);
+                    if (isNaN(value) || value < 1) {
+                        form.setValue("servings", 1, { shouldValidate: true });
+                    }
+                  }}
+                  className="text-base p-3 w-20 text-center"
+                />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  const currentValue = typeof field.value === 'number' ? field.value : parseInt(String(field.value), 10) || 1;
+                  form.setValue("servings", currentValue + 1, { shouldValidate: true });
+                }}
+                aria-label="Increase servings"
+                className="hover:bg-accent/10 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    )},
+    { id: "dietary", label: "Dietary", icon: Salad, content: renderCheckboxGroup("dietaryPreferences" as any, dietaryOptions) },
+    { id: "cuisine", label: "Cuisine", icon: Globe2, content: renderCheckboxGroup("cuisineType" as any, cuisineOptions) },
+    { id: "spice", label: "Spice Level", icon: Flame, content: (
+      <FormField
+        control={form.control}
+        name="spiceLevel"
+        render={({ field }) => (
+          <FormItem className="space-y-3">
+            <FormControl>
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                className="flex flex-wrap gap-2 py-2"
+              >
+                {[
+                  { value: "any", label: "Any" }, { value: "mild", label: "Mild" },
+                  { value: "medium", label: "Medium" }, { value: "spicy", label: "Spicy" },
+                  { value: "very_spicy", label: "Very Spicy" },
+                ].map(opt => (
+                  <FormItem 
+                    key={opt.value} 
+                    className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors duration-200 ease-in-out cursor-pointer"
+                  >
+                    <FormControl>
+                      <RadioGroupItem value={opt.value} id={`spice-${opt.value}`} />
+                    </FormControl>
+                    <FormLabel htmlFor={`spice-${opt.value}`} className="font-normal cursor-pointer w-full text-sm whitespace-nowrap">{opt.label}</FormLabel>
+                  </FormItem>
+                ))}
+              </RadioGroup>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    )},
+    { id: "cookMethod", label: "Cooking Method", icon: CookingPot, content: renderCheckboxGroup("cookingMethod" as any, cookingMethodOptions) },
+    { id: "mealType", label: "Meal Type", icon: Sandwich, content: renderCheckboxGroup("mealType" as any, mealTypeOptions) },
+    { id: "cookTime", label: "Cook Time", icon: Clock, content: (
+      <>
+        <FormField
+          control={form.control}
+          name="cookTimeOption"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-wrap gap-2 py-2"
+                >
+                  {[
+                    { value: "any", label: "Any" }, { value: "15min", label: "Approx. 15 min" },
+                    { value: "30min", label: "Approx. 30 min" }, { value: "45min", label: "Approx. 45 min" },
+                    { value: "1hour", label: "Approx. 1 hour" }, { value: "customTime", label: "Custom" },
+                  ].map(opt => (
+                    <FormItem 
+                      key={opt.value} 
+                      className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors duration-200 ease-in-out cursor-pointer"
+                    >
+                      <FormControl>
+                        <RadioGroupItem value={opt.value} id={`cookTime-${opt.value}`} />
+                      </FormControl>
+                      <FormLabel htmlFor={`cookTime-${opt.value}`} className="font-normal cursor-pointer w-full text-sm whitespace-nowrap">{opt.label}</FormLabel>
+                    </FormItem>
+                  ))}
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {watchedCookTimeOption === "customTime" && (
+          <FormField
+            control={form.control}
+            name="customCookTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="customCookTime" className="font-semibold text-sm">Custom Cook Time (minutes)</FormLabel>
+                <FormControl>
+                  <Input id="customCookTime" type="number" placeholder="e.g., 25" {...field} className="text-sm p-3 w-32" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </>
+    )},
+    { id: "health", label: "Health/Flavor", icon: HeartPulse, content: renderCheckboxGroup("healthOptions" as any, healthSpecificOptions) },
+  ];
+
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-xl">
       <CardHeader>
@@ -239,227 +401,30 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
               )}
             />
 
-            <Accordion type="multiple" className="w-full space-y-4">
-              <AccordionItem value="servings" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2"><Users className="text-accent h-5 w-5" /> Number of Servings</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-6 bg-background/50">
-                  <FormField
-                    control={form.control}
-                    name="servings"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="servings-input" className="font-semibold flex items-center gap-1 sr-only">Number of Servings</FormLabel>
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const currentValue = typeof field.value === 'number' ? field.value : parseInt(String(field.value), 10) || 2;
-                              if (currentValue > 1) {
-                                form.setValue("servings", currentValue - 1, { shouldValidate: true });
-                              }
-                            }}
-                            disabled={watchedServings <= 1}
-                            aria-label="Decrease servings"
-                            className="hover:bg-accent/10 transition-colors"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <FormControl>
-                            <Input
-                              id="servings-input"
-                              type="number"
-                              min="1"
-                              {...field}
-                              onChange={(e) => {
-                                  const value = e.target.value;
-                                  if (value === "") {
-                                    field.onChange(""); 
-                                  } else {
-                                    const numValue = parseInt(value, 10);
-                                    if (!isNaN(numValue) && numValue >=1) {
-                                        field.onChange(numValue);
-                                    }
-                                  }
-                              }}
-                              onBlur={(e) => { 
-                                const value = parseInt(String(field.value),10);
-                                if (isNaN(value) || value < 1) {
-                                    form.setValue("servings", 1, { shouldValidate: true });
-                                }
-                              }}
-                              className="text-base p-3 w-20 text-center"
-                            />
-                          </FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const currentValue = typeof field.value === 'number' ? field.value : parseInt(String(field.value), 10) || 1;
-                              form.setValue("servings", currentValue + 1, { shouldValidate: true });
-                            }}
-                            aria-label="Increase servings"
-                            className="hover:bg-accent/10 transition-colors"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
+            <div className="text-center my-1">
+              <p className="text-md font-medium text-foreground/70">Optionally, refine with details below:</p>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-4">
+              {preferenceCategories.map(category => {
+                const IconComponent = category.icon;
+                return (
+                  <Accordion key={category.id} type="single" collapsible className="min-w-36 w-full sm:w-40 md:w-44 border rounded-lg shadow-sm data-[state=open]:ring-1 data-[state=open]:ring-primary hover:shadow-md transition-shadow bg-card">
+                    <AccordionItem value={category.id} className="border-0">
+                      <AccordionTrigger className="p-3 text-sm font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 w-full data-[state=open]:border-b">
+                        <div className="flex flex-col items-center gap-1 w-full">
+                          <IconComponent className="text-accent h-7 w-7" />
+                          <span>{category.label}</span>
                         </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="dietary" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2"><Salad className="text-accent h-5 w-5" /> Dietary Preferences</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                  {renderCheckboxGroup("dietaryPreferences" as any, dietaryOptions)}
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="cuisine" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2"><Globe2 className="text-accent h-5 w-5" /> Cuisine Type</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                  {renderCheckboxGroup("cuisineType" as any, cuisineOptions)}
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="spice" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2"><Flame className="text-accent h-5 w-5" /> Spice Level</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                  <FormField
-                    control={form.control}
-                    name="spiceLevel"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-wrap gap-2 py-2" // Changed to flex-wrap and gap-2
-                          >
-                            {[
-                              { value: "any", label: "Any" },
-                              { value: "mild", label: "Mild" },
-                              { value: "medium", label: "Medium" },
-                              { value: "spicy", label: "Spicy" },
-                              { value: "very_spicy", label: "Very Spicy" },
-                            ].map(opt => (
-                              <FormItem 
-                                key={opt.value} 
-                                className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors duration-200 ease-in-out cursor-pointer" // Compacted padding, rounded-md
-                              >
-                                <FormControl>
-                                  <RadioGroupItem value={opt.value} id={`spice-${opt.value}`} />
-                                </FormControl>
-                                <FormLabel htmlFor={`spice-${opt.value}`} className="font-normal cursor-pointer w-full text-sm whitespace-nowrap">{opt.label}</FormLabel>
-                              </FormItem>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="cookMethod" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2"><CookingPot className="text-accent h-5 w-5" /> Cooking Method</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                  {renderCheckboxGroup("cookingMethod" as any, cookingMethodOptions)}
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="mealType" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2"><Sandwich className="text-accent h-5 w-5" /> Meal Type</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                  {renderCheckboxGroup("mealType" as any, mealTypeOptions)}
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="cooktime" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                   <div className="flex items-center gap-2"><Clock className="text-accent h-5 w-5" /> Preferred Cook Time</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-4 bg-background/50">
-                  <FormField
-                    control={form.control}
-                    name="cookTimeOption"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-wrap gap-2 py-2" // Changed to flex-wrap and gap-2
-                          >
-                            {[
-                              { value: "any", label: "Any" },
-                              { value: "15min", label: "Approx. 15 min" },
-                              { value: "30min", label: "Approx. 30 min" },
-                              { value: "45min", label: "Approx. 45 min" },
-                              { value: "1hour", label: "Approx. 1 hour" },
-                              { value: "customTime", label: "Custom" },
-                            ].map(opt => (
-                              <FormItem 
-                                key={opt.value} 
-                                className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors duration-200 ease-in-out cursor-pointer" // Compacted padding, rounded-md
-                              >
-                                <FormControl>
-                                  <RadioGroupItem value={opt.value} id={`cookTime-${opt.value}`} />
-                                </FormControl>
-                                <FormLabel htmlFor={`cookTime-${opt.value}`} className="font-normal cursor-pointer w-full text-sm whitespace-nowrap">{opt.label}</FormLabel>
-                              </FormItem>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {watchedCookTimeOption === "customTime" && (
-                    <FormField
-                      control={form.control}
-                      name="customCookTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel htmlFor="customCookTime" className="font-semibold text-sm">Custom Cook Time (minutes)</FormLabel>
-                          <FormControl>
-                            <Input id="customCookTime" type="number" placeholder="e.g., 25" {...field} className="text-sm p-3 w-32" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="health" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
-                   <div className="flex items-center gap-2"><HeartPulse className="text-accent h-5 w-5" /> Health & Flavor Options</div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                   {renderCheckboxGroup("healthOptions" as any, healthSpecificOptions)}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                      </AccordionTrigger>
+                      <AccordionContent className="p-3 bg-background/50 max-h-60 overflow-y-auto">
+                        {category.content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                );
+              })}
+            </div>
             
             {error && <p className="text-sm font-medium text-destructive text-center py-2">{error}</p>}
 
@@ -482,4 +447,3 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
-
