@@ -45,9 +45,9 @@ const ingredientEmojiMap: Record<string, string> = {
   spinach: '🥬',
   lettuce: '🥬',
   cucumber: '🥒', cucumbers: '🥒',
-  bellpepper: '🫑', 'bell pepper': '🫑', 'capsicum': '🫑',
+  bellpepper: '🫑', 'bell pepper': '🫑', 'capsicum': '🫑', 'red bell pepper': '🫑', 'green bell pepper': '🫑', 'yellow bell pepper': '🫑',
   pepper: '🌶️', // General pepper
-  chili: '🌶️', 'chilli': '🌶️', 'green chili': '🌶️', 'red chili': '🌶️', 'jalapeno': '🌶️',
+  chili: '🌶️', 'chilli': '🌶️', 'green chili': '🌶️', 'red chili': '🌶️', 'jalapeno': '🌶️', 'chili powder': '🌶️', 'red chili powder': '🌶️',
   corn: '🌽',
   pea: '🫛', peas: '🫛', 'green peas': '🫛',
   mushroom: '🍄', mushrooms: '🍄',
@@ -73,7 +73,7 @@ const ingredientEmojiMap: Record<string, string> = {
 
   // Grains, Pasta, Bread & Staples
   flour: '🌾', 'all-purpose flour': '🌾', 'wheat flour': '🌾', 'maida': '🌾',
-  rice: '🍚', 'basmati rice': '🍚', 'jasmine rice': '🍚', 'brown rice': '🍚',
+  rice: '🍚', 'basmati rice': '🍚', 'jasmine rice': '🍚', 'brown rice': '🍚', 'dosa rice': '🍚',
   pasta: '🍝', 'spaghetti': '🍝', 'penne': '🍝', 'macaroni': '🍝', 'fettuccine': '🍝',
   bread: '🍞', 'white bread': '🍞', 'brown bread': '🍞', 'baguette': '🥖', 'bun': '🍔',
   noodle: '🍜', noodles: '🍜', 'ramen noodles': '🍜', 'egg noodles': '🍜',
@@ -87,6 +87,7 @@ const ingredientEmojiMap: Record<string, string> = {
   salt: '🧂', 'black salt': '🧂',
   'olive oil': '🫒', 'extra virgin olive oil': '🫒',
   'vegetable oil': '🛢️', 'sunflower oil': '🌻', 'canola oil': '🛢️', 'corn oil': '🌽', 'sesame oil': '🌰',
+  'mustard oil': '🌻', // Updated for mustard oil
   'coconut oil': '🥥',
   oil: '🛢️', // Generic oil
   vinegar: '🍾', 'apple cider vinegar': '🍎', 'white vinegar': '🍾', 'balsamic vinegar': '🍾',
@@ -95,12 +96,12 @@ const ingredientEmojiMap: Record<string, string> = {
   // Dairy & Alternatives
   milk: '🥛', 'cow milk': '🥛',
   cheese: '🧀', 'cheddar cheese': '🧀', 'mozzarella cheese': '🧀', 'parmesan cheese': '🧀', 'feta cheese': '🧀', 'cottage cheese': '🧀', 'cream cheese': '🧀',
+  paneer: '🧀', // Using cheese for paneer
   butter: '🧈',
-  yogurt: '🥣', 'yoghurt': '🥣', 'greek yogurt': '🥣',
+  yogurt: '🥣', 'yoghurt': '🥣', 'greek yogurt': '🥣', 'plain yogurt': '🥣',
   cream: '🥛', 'heavy cream': '🥛', 'sour cream': '🥣', 'whipping cream': '🥛',
   egg: '🥚', eggs: '🥚',
   tofu: '⬜', // White square
-  paneer: '🧀', // Using cheese for paneer
   'almond milk': '🥛', 'soy milk': '🥛', 'oat milk': '🥛', 'coconut milk': '🥥',
   ghee: '🧈', // Using butter
 
@@ -123,7 +124,7 @@ const ingredientEmojiMap: Record<string, string> = {
   parsley: '🌿',
   basil: '🌿', 'holy basil': '🌿', 'tulsi': '🌿',
   oregano: '🌿',
-  cilantro: '🌿', coriander: '🌿', 'coriander leaves': '🌿', 'coriander powder': '🌿',
+  cilantro: '🌿', coriander: '🌿', 'coriander leaves': '🌿', 'coriander powder': '🌿', 'fresh cilantro': '🌿', 'fresh cilantro leaves': '🌿',
   mint: '🌿',
   rosemary: '🌿',
   thyme: '🌿',
@@ -131,7 +132,7 @@ const ingredientEmojiMap: Record<string, string> = {
   sage: '🌿',
   cumin: '🌿', 'cumin powder': '🌿', 'cumin seeds': '🌿', 'jeera': '🌿',
   turmeric: '🟡', 'turmeric powder': '🟡', 'haldi': '🟡',
-  ginger: '🫚',
+  ginger: '🫚', 'ginger-garlic paste': '🧄', // Prioritize garlic if both are there, or could use ginger
   cinnamon: '🌿', 'cinnamon stick': '🌿', 'cinnamon powder': '🌿',
   nutmeg: '🌰', // Using nut for nutmeg
   clove: '🌿', 'cloves': '🌿',
@@ -144,11 +145,11 @@ const ingredientEmojiMap: Record<string, string> = {
   'star anise': '⭐',
   'curry leaves': '🌿', 'curry leaf': '🌿',
   'garam masala': '🔥', // Fire for garam masala mix
-  'chili powder': '🌶️', 'red chili powder': '🌶️',
   'mustard seeds': '🟡', 'rai': '🟡',
-  'fenugreek seeds': '🌿', 'methi seeds': '🌿',
+  'fenugreek seeds': '🌿', 'methi seeds': '🌿', 'fenugreek': '🌿',
   'fennel seeds': '🌿', 'saunf': '🌿',
   'asafoetida': '💨', 'hing': '💨', // Puff of smoke
+  'ajwain': '🌿', 'carom seeds': '🌿', // Added Ajwain/Carom seeds
 
   // Nuts & Seeds
   almond: '🌰', almonds: '🌰',
@@ -166,6 +167,7 @@ const ingredientEmojiMap: Record<string, string> = {
   pumpkinseed: '🎃', 'pumpkin seed': '🎃', 'pumpkin seeds': '🎃',
 
   // Legumes
+  'urad dal': '🫘',
   lentil: '🫘', lentils: '🫘', 'red lentil': '🫘', 'green lentil': '🫘', 'brown lentil': '🫘', 'masoor dal': '🫘', 'moong dal': '🫘', 'toor dal': '🫘', 'chana dal': '🫘',
   chickpea: '🫘', chickpeas: '🫘', 'garbanzo beans': '🫘', 'chana': '🫘', 'kabuli chana': '🫘',
   'kidney bean': '🫘', kidneybean: '🫘', 'kidney beans': '🫘', 'rajma': '🫘',
@@ -216,8 +218,8 @@ const ingredientEmojiMap: Record<string, string> = {
   smoothie: '🥤',
   juice: '🧃',
   sauce: '🥫', // Generic sauce
-  'pasta sauce': '🍝',
-  'pizza sauce': '🍕',
+  'pizza sauce': '🍕', // More specific sauce
+  'pasta sauce': '🍝', // More specific sauce
   dressing: '🥗', // Salad for dressing
   gravy: '🥣',
   stew: '🥘',
@@ -234,23 +236,35 @@ const ingredientEmojiMap: Record<string, string> = {
 
 // Order of keywords matters if one is a substring of another.
 // This array helps process longer keywords first.
-const sortedEmojiKeywords = Object.keys(ingredientEmojiMap).sort((a, b) => b.length - a.length);
+const sortedEmojiKeywords = Object.keys(ingredientEmojiMap).sort((a, b) => {
+  if (b.length === a.length) {
+    // If lengths are equal, prioritize keys that are phrases (contain spaces)
+    // This helps "green chili" match before "chili" if "green chili" is the exact phrase.
+    const aIsPhrase = a.includes(' ');
+    const bIsPhrase = b.includes(' ');
+    if (aIsPhrase && !bIsPhrase) return -1;
+    if (!aIsPhrase && bIsPhrase) return 1;
+  }
+  return b.length - a.length;
+});
 
 export function getEmojiForIngredient(ingredientName: string): string {
-  const nameLower = ingredientName.toLowerCase().replace(/,/g, ''); // Remove commas for better matching
+  const nameLower = ingredientName.toLowerCase().replace(/,/g, '').trim();
   
   // Prioritize exact or near-exact matches for longer phrases first
   for (const keyword of sortedEmojiKeywords) {
     // Regex for whole word matching (or phrase matching)
-    // For single word keywords, use word boundaries. For multi-word, match as phrase.
-    const pattern = keyword.includes(' ') ? `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b` : `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`;
+    const pattern = keyword.includes(' ') 
+      ? `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b` 
+      : `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`;
     const regex = new RegExp(pattern, 'i');
     if (regex.test(nameLower)) {
       return ingredientEmojiMap[keyword];
     }
   }
 
-  // Fallback: If no specific match, try a general includes for broader matching, still prioritizing longer keywords
+  // Fallback: If no specific regex match, try a general includes for broader matching, still prioritizing longer keywords
+  // This helps if the ingredient is "finely chopped green onions" and we have "green onion" or "onion"
   for (const keyword of sortedEmojiKeywords) {
       if (nameLower.includes(keyword)) {
           return ingredientEmojiMap[keyword];
@@ -258,5 +272,3 @@ export function getEmojiForIngredient(ingredientName: string): string {
   }
   return ''; // No emoji if no match
 }
-
-    
