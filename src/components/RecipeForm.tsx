@@ -73,24 +73,24 @@ const healthSpecificOptions = [
   { id: "high-fiber", label: "High Fiber", icon: Wheat },
 ];
 
-const cuisineOptions = [
-  { id: "indian", label: "Indian", icon: Sprout }, 
-  { id: "italian", label: "Italian", icon: Pizza },
-  { id: "mexican", label: "Mexican", icon: Flame }, 
-  { id: "chinese", label: "Chinese", icon: Sprout },
-  { id: "thai", label: "Thai", icon: Sprout },
-  { id: "japanese", label: "Japanese", icon: Fish },
-  { id: "mediterranean", label: "Mediterranean", icon: Leaf },
-  { id: "french", label: "French", icon: Croissant },
-  { id: "american", label: "American", icon: Beef }, 
-  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout },
-  { id: "african", label: "African", icon: Sprout },
-  { id: "caribbean", label: "Caribbean", icon: Fish },
-  { id: "greek", label: "Greek", icon: Leaf },
-  { id: "spanish", label: "Spanish", icon: Fish },
-  { id: "vietnamese", label: "Vietnamese", icon: Sprout },
-  { id: "korean", label: "Korean", icon: Sprout },
-  { id: "german", label: "German", icon: Drumstick }, 
+const cuisineOptions: Array<{ id: string; label: string; icon?: React.ElementType; flagEmoji?: string }> = [
+  { id: "indian", label: "Indian", flagEmoji: "🇮🇳", icon: Sprout },
+  { id: "italian", label: "Italian", flagEmoji: "🇮🇹", icon: Pizza },
+  { id: "mexican", label: "Mexican", flagEmoji: "🇲🇽", icon: Flame },
+  { id: "chinese", label: "Chinese", flagEmoji: "🇨🇳", icon: Sprout },
+  { id: "thai", label: "Thai", flagEmoji: "🇹🇭", icon: Sprout },
+  { id: "japanese", label: "Japanese", flagEmoji: "🇯🇵", icon: Fish },
+  { id: "mediterranean", label: "Mediterranean", icon: Leaf }, // No single flag
+  { id: "french", label: "French", flagEmoji: "🇫🇷", icon: Croissant },
+  { id: "american", label: "American", flagEmoji: "🇺🇸", icon: Beef },
+  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout }, // No single flag
+  { id: "african", label: "African", icon: Sprout }, // No single flag (continent)
+  { id: "caribbean", label: "Caribbean", icon: Fish }, // No single flag (region)
+  { id: "greek", label: "Greek", flagEmoji: "🇬🇷", icon: Leaf },
+  { id: "spanish", label: "Spanish", flagEmoji: "🇪🇸", icon: Fish },
+  { id: "vietnamese", label: "Vietnamese", flagEmoji: "🇻🇳", icon: Sprout },
+  { id: "korean", label: "Korean", flagEmoji: "🇰🇷", icon: Sprout },
+  { id: "german", label: "German", flagEmoji: "🇩🇪", icon: Drumstick },
   { id: "other", label: "Other / Fusion", icon: Sparkle },
 ];
 
@@ -147,20 +147,24 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     await onSubmitPrompt(data);
   };
 
-  const renderCheckboxGroup = (fieldName: keyof RecipeFormValues, options: Array<{id: string, label: string, icon?: React.ElementType}>) => (
+  const renderCheckboxGroup = (
+    fieldName: keyof RecipeFormValues, 
+    options: Array<{id: string, label: string, icon?: React.ElementType, flagEmoji?: string}>
+  ) => (
      <FormField
       control={form.control}
       name={fieldName as any} 
       render={() => (
         <FormItem>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {options.map((item) => (
+            {options.map((item) => {
+              const IconComponent = item.icon;
+              return (
               <FormField
                 key={item.id}
                 control={form.control}
                 name={fieldName as any} 
                 render={({ field }) => {
-                  const Icon = item.icon;
                   return (
                     <FormItem key={item.id} className="flex flex-row items-center space-x-2 space-y-0 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-all duration-200 ease-in-out cursor-pointer">
                       <FormControl>
@@ -179,14 +183,18 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                         />
                       </FormControl>
                       <FormLabel className="font-normal cursor-pointer flex items-center gap-2 text-sm flex-1">
-                        {Icon && <Icon className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />}
+                        {item.flagEmoji ? (
+                          <span className="text-lg mr-1">{item.flagEmoji}</span>
+                        ) : (
+                          IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                        )}
                         <span>{item.label}</span>
                       </FormLabel>
                     </FormItem>
                   );
                 }}
               />
-            ))}
+            )})}
           </div>
           <FormMessage />
         </FormItem>
@@ -465,5 +473,3 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
-
-    
