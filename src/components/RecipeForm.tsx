@@ -16,7 +16,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Minus, Plus, Globe2, CookingPot, Sandwich, 
-  Leaf, Fish, Wheat, Bone, Drumstick, Wind, Gauge, Coffee, Soup, Cookie, CakeSlice, Grape, Croissant, Shrub, Vegan, Ban, Percent, Thermometer, Sparkle, Shell, Feather, Beef, Turkey, Apple, Pizza, IceCream, Sprout
+  Leaf, Fish, Wheat, Bone, Drumstick, Wind, Gauge, Coffee, Soup, Cookie, CakeSlice, Grape, Croissant, Shrub, Vegan, Ban, Percent, Thermometer, Sparkle, Shell, Feather, Beef, Apple, Pizza, IceCream, Sprout
 } from "lucide-react";
 
 const recipeFormSchema = z.object({
@@ -99,7 +99,7 @@ const cookingMethodOptions = [
   { id: "frying", label: "Frying", icon: Utensils }, 
   { id: "grilling", label: "Grilling", icon: Flame },
   { id: "steaming", label: "Steaming", icon: Soup }, 
-  { id: "roasting", label: "Roasting", icon: Turkey }, 
+  { id: "roasting", label: "Roasting", icon: Drumstick }, 
   { id: "slow-cooking", label: "Slow Cooking", icon: Clock },
   { id: "stir-frying", label: "Stir-Frying", icon: Utensils },
   { id: "boiling", label: "Boiling", icon: Soup },
@@ -465,3 +465,5 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
+
+    
