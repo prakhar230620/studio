@@ -3,7 +3,6 @@
 "use client";
 
 import type React from 'react';
-import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,14 +14,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Minus, Plus } from "lucide-react";
-import type { Recipe } from '@/lib/types';
+import { Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Minus, Plus, Globe2, CookingPot, Sandwich, Leaf, Fish, Wheat, Bone, Drumstick } from "lucide-react"; // Added new icons
 
 const recipeFormSchema = z.object({
   mainPrompt: z.string().min(1, "Please describe your recipe idea."),
-  // recipeName: z.string().optional(), // Removed recipeName
   servings: z.coerce.number().min(1, "Servings must be at least 1.").default(2),
   dietaryPreferences: z.array(z.string()).optional(),
+  cuisineType: z.array(z.string()).optional(),
+  spiceLevel: z.enum(["mild", "medium", "spicy", "very_spicy", "any"]).default("any"),
+  cookingMethod: z.array(z.string()).optional(),
+  mealType: z.array(z.string()).optional(),
   cookTimeOption: z.enum(["any", "15min", "30min", "45min", "1hour", "customTime"]).default("any"),
   customCookTime: z.coerce.number().min(1, "Custom cook time must be at least 1 minute.").optional(),
   healthOptions: z.array(z.string()).optional(),
@@ -39,34 +40,84 @@ const recipeFormSchema = z.object({
 export type RecipeFormValues = z.infer<typeof recipeFormSchema>;
 
 interface RecipeFormProps {
-  onRecipeGenerated: (recipe: Recipe) => void;
   isLoading: boolean;
   onSubmitPrompt: (data: RecipeFormValues) => Promise<void>;
   error: string | null;
 }
 
 const dietaryOptions = [
-  { id: "vegetarian", label: "Vegetarian" },
-  { id: "vegan", label: "Vegan" },
-  { id: "gluten-free", label: "Gluten-Free" },
+  { id: "vegetarian", label: "Vegetarian", icon: Leaf },
+  { id: "vegan", label: "Vegan", icon: Leaf },
+  { id: "gluten-free", label: "Gluten-Free", icon: Wheat },
   { id: "dairy-free", label: "Dairy-Free" },
   { id: "fat-free", label: "Fat-Free" },
+  { id: "pescatarian", label: "Pescatarian", icon: Fish },
+  { id: "keto", label: "Keto" },
+  { id: "paleo", label: "Paleo", icon: Bone },
+  { id: "low-carb", label: "Low-Carb" },
+  { id: "nut-free", label: "Nut-Free" },
+  { id: "soy-free", label: "Soy-Free" },
+  { id: "non-vegetarian", label: "Non-Vegetarian", icon: Drumstick },
 ];
 
 const healthSpecificOptions = [
   { id: "low-sugar", label: "Low Sugar" },
-  { id: "spicy", label: "Spicy / High Chili" },
   { id: "low-sodium", label: "Low Sodium" },
   { id: "high-protein", label: "High Protein" },
+  { id: "low-calorie", label: "Low Calorie" },
 ];
 
-export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error }: RecipeFormProps) {
+const cuisineOptions = [
+  { id: "indian", label: "Indian" },
+  { id: "italian", label: "Italian" },
+  { id: "mexican", label: "Mexican" },
+  { id: "chinese", label: "Chinese" },
+  { id: "thai", label: "Thai" },
+  { id: "japanese", label: "Japanese" },
+  { id: "mediterranean", label: "Mediterranean" },
+  { id: "french", label: "French" },
+  { id: "american", label: "American" },
+  { id: "middle-eastern", label: "Middle Eastern" },
+  { id: "african", label: "African" },
+  { id: "caribbean", label: "Caribbean" },
+  { id: "other", label: "Other / Fusion" },
+];
+
+const cookingMethodOptions = [
+  { id: "baking", label: "Baking" },
+  { id: "frying", label: "Frying" },
+  { id: "grilling", label: "Grilling" },
+  { id: "steaming", label: "Steaming" },
+  { id: "roasting", label: "Roasting" },
+  { id: "slow-cooking", label: "Slow Cooking" },
+  { id: "stir-frying", label: "Stir-Frying" },
+  { id: "boiling", label: "Boiling" },
+  { id: "no-cook", label: "No-Cook / Raw" },
+];
+
+const mealTypeOptions = [
+  { id: "breakfast", label: "Breakfast" },
+  { id: "lunch", label: "Lunch" },
+  { id: "dinner", label: "Dinner" },
+  { id: "snack", label: "Snack" },
+  { id: "dessert", label: "Dessert" },
+  { id: "appetizer", label: "Appetizer" },
+  { id: "brunch", label: "Brunch" },
+  { id: "side-dish", label: "Side Dish" },
+];
+
+
+export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps) {
   const form = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeFormSchema),
     defaultValues: {
       mainPrompt: "",
       servings: 2,
       dietaryPreferences: [],
+      cuisineType: [],
+      spiceLevel: "any",
+      cookingMethod: [],
+      mealType: [],
       cookTimeOption: "any",
       healthOptions: [],
     },
@@ -81,6 +132,53 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
     }
     await onSubmitPrompt(data);
   };
+
+  const renderCheckboxGroup = (fieldName: keyof RecipeFormValues, options: Array<{id: string, label: string, icon?: React.ElementType}>) => (
+     <FormField
+      control={form.control}
+      name={fieldName as any} // Added 'as any' to bypass strict type checking for dynamic field name
+      render={() => (
+        <FormItem>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
+            {options.map((item) => (
+              <FormField
+                key={item.id}
+                control={form.control}
+                name={fieldName as any} // Added 'as any'
+                render={({ field }) => {
+                  const Icon = item.icon;
+                  return (
+                    <FormItem key={item.id} className="flex flex-row items-center space-x-2 space-y-0 p-2 hover:bg-muted/30 rounded-md transition-colors has-[:checked]:bg-primary/10 has-[:checked]:border-primary border border-transparent">
+                      <FormControl>
+                        <Checkbox
+                          checked={Array.isArray(field.value) && field.value?.includes(item.id)}
+                          onCheckedChange={(checked) => {
+                            const currentValue = Array.isArray(field.value) ? field.value : [];
+                            return checked
+                              ? field.onChange([...currentValue, item.id])
+                              : field.onChange(
+                                  currentValue?.filter(
+                                    (value) => value !== item.id
+                                  )
+                                );
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-1.5 text-sm">
+                        {Icon && <Icon className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />}
+                        {item.label}
+                      </FormLabel>
+                    </FormItem>
+                  );
+                }}
+              />
+            ))}
+          </div>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-xl">
@@ -117,8 +215,8 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
             />
 
             <Accordion type="multiple" className="w-full space-y-4">
-              <AccordionItem value="servings" className="border rounded-lg shadow-sm overflow-hidden">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30">
+              <AccordionItem value="servings" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
                   <div className="flex items-center gap-2"><Users className="text-accent h-5 w-5" /> Number of Servings</div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 space-y-6 bg-background/50">
@@ -141,6 +239,7 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                             }}
                             disabled={watchedServings <= 1}
                             aria-label="Decrease servings"
+                            className="hover:bg-accent/10 transition-colors"
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -153,7 +252,7 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                               onChange={(e) => {
                                   const value = e.target.value;
                                   if (value === "") {
-                                    field.onChange(""); // Allow empty for intermediate typing
+                                    field.onChange(""); 
                                   } else {
                                     const numValue = parseInt(value, 10);
                                     if (!isNaN(numValue) && numValue >=1) {
@@ -161,7 +260,7 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                                     }
                                   }
                               }}
-                              onBlur={(e) => { // Validate on blur if empty or less than 1
+                              onBlur={(e) => { 
                                 const value = parseInt(String(field.value),10);
                                 if (isNaN(value) || value < 1) {
                                     form.setValue("servings", 1, { shouldValidate: true });
@@ -179,6 +278,7 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                               form.setValue("servings", currentValue + 1, { shouldValidate: true });
                             }}
                             aria-label="Increase servings"
+                            className="hover:bg-accent/10 transition-colors"
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -190,53 +290,83 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="dietary" className="border rounded-lg shadow-sm overflow-hidden">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30">
+              <AccordionItem value="dietary" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
                   <div className="flex items-center gap-2"><Salad className="text-accent h-5 w-5" /> Dietary Preferences</div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
+                  {renderCheckboxGroup("dietaryPreferences" as any, dietaryOptions)}
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="cuisine" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
+                  <div className="flex items-center gap-2"><Globe2 className="text-accent h-5 w-5" /> Cuisine Type</div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
+                  {renderCheckboxGroup("cuisineType" as any, cuisineOptions)}
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="spice" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
+                  <div className="flex items-center gap-2"><Flame className="text-accent h-5 w-5" /> Spice Level</div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
                   <FormField
                     control={form.control}
-                    name="dietaryPreferences"
-                    render={() => (
-                      <FormItem>
-                        {dietaryOptions.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="dietaryPreferences"
-                            render={({ field }) => {
-                              return (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0 p-2 hover:bg-muted/30 rounded-md">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            )
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal cursor-pointer">{item.label}</FormLabel>
-                                </FormItem>
-                              )
-                            }}
-                          />
-                        ))}
+                    name="spiceLevel"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+                          >
+                            {[
+                              { value: "any", label: "Any" },
+                              { value: "mild", label: "Mild" },
+                              { value: "medium", label: "Medium" },
+                              { value: "spicy", label: "Spicy" },
+                              { value: "very_spicy", label: "Very Spicy" },
+                            ].map(opt => (
+                              <FormItem key={opt.value} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/30 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors">
+                                <FormControl>
+                                  <RadioGroupItem value={opt.value} id={`spice-${opt.value}`} />
+                                </FormControl>
+                                <FormLabel htmlFor={`spice-${opt.value}`} className="font-normal cursor-pointer w-full text-sm">{opt.label}</FormLabel>
+                              </FormItem>
+                            ))}
+                          </RadioGroup>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </AccordionContent>
               </AccordionItem>
+
+              <AccordionItem value="cookMethod" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
+                  <div className="flex items-center gap-2"><CookingPot className="text-accent h-5 w-5" /> Cooking Method</div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
+                  {renderCheckboxGroup("cookingMethod" as any, cookingMethodOptions)}
+                </AccordionContent>
+              </AccordionItem>
               
-              <AccordionItem value="cooktime" className="border rounded-lg shadow-sm overflow-hidden">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30">
+              <AccordionItem value="mealType" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
+                  <div className="flex items-center gap-2"><Sandwich className="text-accent h-5 w-5" /> Meal Type</div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
+                  {renderCheckboxGroup("mealType" as any, mealTypeOptions)}
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="cooktime" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
                    <div className="flex items-center gap-2"><Clock className="text-accent h-5 w-5" /> Preferred Cook Time</div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 space-y-4 bg-background/50">
@@ -259,11 +389,11 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                               { value: "1hour", label: "Approx. 1 hour" },
                               { value: "customTime", label: "Custom" },
                             ].map(opt => (
-                              <FormItem key={opt.value} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/30 has-[:checked]:bg-accent/10 has-[:checked]:border-accent">
+                              <FormItem key={opt.value} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/30 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors">
                                 <FormControl>
                                   <RadioGroupItem value={opt.value} id={`cookTime-${opt.value}`} />
                                 </FormControl>
-                                <FormLabel htmlFor={`cookTime-${opt.value}`} className="font-normal cursor-pointer w-full">{opt.label}</FormLabel>
+                                <FormLabel htmlFor={`cookTime-${opt.value}`} className="font-normal cursor-pointer w-full text-sm">{opt.label}</FormLabel>
                               </FormItem>
                             ))}
                           </RadioGroup>
@@ -278,9 +408,9 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                       name="customCookTime"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel htmlFor="customCookTime" className="font-semibold">Custom Cook Time (minutes)</FormLabel>
+                          <FormLabel htmlFor="customCookTime" className="font-semibold text-sm">Custom Cook Time (minutes)</FormLabel>
                           <FormControl>
-                            <Input id="customCookTime" type="number" placeholder="e.g., 25" {...field} className="text-base p-3 w-32" />
+                            <Input id="customCookTime" type="number" placeholder="e.g., 25" {...field} className="text-sm p-3 w-32" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -290,59 +420,19 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="health" className="border rounded-lg shadow-sm overflow-hidden">
-                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30">
+              <AccordionItem value="health" className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 transition-colors">
                    <div className="flex items-center gap-2"><HeartPulse className="text-accent h-5 w-5" /> Health & Flavor Options</div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 space-y-3 bg-background/50">
-                   <FormField
-                    control={form.control}
-                    name="healthOptions"
-                    render={() => (
-                      <FormItem>
-                        {healthSpecificOptions.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="healthOptions"
-                            render={({ field }) => {
-                              const Icon = item.id === "spicy" ? Flame : null;
-                              return (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0 p-2 hover:bg-muted/30 rounded-md">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            )
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal cursor-pointer flex items-center gap-1">
-                                    {Icon && <Icon className="h-4 w-4 text-red-500" />}
-                                    {item.label}
-                                  </FormLabel>
-                                </FormItem>
-                              )
-                            }}
-                          />
-                        ))}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                   {renderCheckboxGroup("healthOptions" as any, healthSpecificOptions)}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
             
             {error && <p className="text-sm font-medium text-destructive text-center py-2">{error}</p>}
 
-            <Button type="submit" className="w-full text-xl py-8 bg-accent hover:bg-accent/90 font-bold tracking-wide" disabled={isLoading}>
+            <Button type="submit" className="w-full text-xl py-8 bg-accent hover:bg-accent/90 font-bold tracking-wide transition-colors" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-3 h-6 w-6 animate-spin" />
@@ -361,3 +451,4 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
     </Card>
   );
 }
+

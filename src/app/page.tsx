@@ -21,8 +21,7 @@ export default function HomePage() {
     onSuccess: (data) => {
       if ('error' in data) {
         console.error("Error from action:", data.error);
-        // Error is displayed via RecipeForm's error prop
-        setCurrentRecipe(null); // Ensure form is shown on error
+        setCurrentRecipe(null); 
       } else {
         const updatedRecipe = { ...data, isFavorite: favorites.some(fav => fav.id === data.id) };
         setCurrentRecipe(updatedRecipe);
@@ -30,14 +29,11 @@ export default function HomePage() {
     },
     onError: (error) => {
       console.error("Mutation error:", error);
-      setCurrentRecipe(null); // Ensure form is shown on error
-       // Error is displayed via RecipeForm's error prop
+      setCurrentRecipe(null); 
     }
   });
 
   const handleFormSubmit = async (data: RecipeFormValues) => {
-    // setCurrentRecipe(null); // Don't clear here, onSuccess will handle it or error will show form
-    
     let detailedPrompt = data.mainPrompt;
 
     if (data.servings) {
@@ -45,6 +41,18 @@ export default function HomePage() {
     }
     if (data.dietaryPreferences && data.dietaryPreferences.length > 0) {
       detailedPrompt += `\nKey dietary considerations: ${data.dietaryPreferences.join(', ')}. Adhere to these strictly.`;
+    }
+    if (data.cuisineType && data.cuisineType.length > 0) {
+      detailedPrompt += `\nPreferred cuisine style(s): ${data.cuisineType.join(', ')}.`;
+    }
+    if (data.spiceLevel && data.spiceLevel !== "any") {
+      detailedPrompt += `\nSpice level preference: ${data.spiceLevel.replace('_', ' ')}.`;
+    }
+    if (data.cookingMethod && data.cookingMethod.length > 0) {
+      detailedPrompt += `\nPreferred cooking method(s): ${data.cookingMethod.join(', ')}.`;
+    }
+    if (data.mealType && data.mealType.length > 0) {
+      detailedPrompt += `\nThis recipe is for meal type(s): ${data.mealType.join(', ')}.`;
     }
     if (data.cookTimeOption && data.cookTimeOption !== "any") {
       if (data.cookTimeOption === "customTime" && data.customCookTime) {
@@ -55,7 +63,11 @@ export default function HomePage() {
       }
     }
     if (data.healthOptions && data.healthOptions.length > 0) {
-      detailedPrompt += `\nHealth and flavor profile: ${data.healthOptions.join(', ')}. For example, if 'spicy' is chosen, make it noticeably spicy. If 'low-sugar', minimize added sugars.`;
+      // If "spicy" was a health option and is now covered by spiceLevel, ensure it's not duplicated or conflicting
+      const healthPromptParts = data.healthOptions.filter(opt => !(data.spiceLevel !== "any" && opt.toLowerCase().includes("spicy")));
+      if (healthPromptParts.length > 0) {
+        detailedPrompt += `\nHealth and flavor profile: ${healthPromptParts.join(', ')}. For example, if 'low-sugar' is chosen, minimize added sugars.`;
+      }
     }
 
     detailedPrompt += "\nEnsure the output is a JSON object with 'title', 'ingredients' (array of strings), 'instructions' (string), and 'servings' (number) fields.";
@@ -79,8 +91,6 @@ export default function HomePage() {
 
   const handleBackToForm = () => {
     setCurrentRecipe(null);
-    // Reset mutation state if needed, though usually it resets on new mutate call
-    // mutation.reset(); // if you want to clear error messages immediately
   };
 
   return (
@@ -94,7 +104,7 @@ export default function HomePage() {
           <Button 
             onClick={handleBackToForm} 
             variant="outline" 
-            className="mt-8 w-full sm:w-auto flex items-center justify-center"
+            className="mt-8 w-full sm:w-auto flex items-center justify-center hover:bg-accent/10 transition-colors"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Create Another Recipe
@@ -110,3 +120,4 @@ export default function HomePage() {
     </div>
   );
 }
+
