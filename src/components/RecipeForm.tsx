@@ -14,7 +14,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Minus, Plus, Globe2, CookingPot, Sandwich, Leaf, Fish, Wheat, Bone, Drumstick } from "lucide-react"; // Added new icons
+import { 
+  Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Minus, Plus, Globe2, CookingPot, Sandwich, 
+  Leaf, Fish, Wheat, Bone, Drumstick, Wind, Gauge, Coffee, Soup, Cookie, CakeSlice, Grape, Croissant, Shrub, Vegan, Ban, Percent, Thermometer, Sparkle, Shell, Feather, Beef, Turkey, Apple, Pizza, IceCream, Sprout
+} from "lucide-react";
 
 const recipeFormSchema = z.object({
   mainPrompt: z.string().min(1, "Please describe your recipe idea."),
@@ -47,63 +50,74 @@ interface RecipeFormProps {
 
 const dietaryOptions = [
   { id: "vegetarian", label: "Vegetarian", icon: Leaf },
-  { id: "vegan", label: "Vegan", icon: Leaf },
+  { id: "vegan", label: "Vegan", icon: Vegan },
   { id: "gluten-free", label: "Gluten-Free", icon: Wheat },
-  { id: "dairy-free", label: "Dairy-Free" },
-  { id: "fat-free", label: "Fat-Free" },
+  { id: "dairy-free", label: "Dairy-Free", icon: Ban }, 
+  { id: "fat-free", label: "Fat-Free", icon: Percent }, 
   { id: "pescatarian", label: "Pescatarian", icon: Fish },
-  { id: "keto", label: "Keto" },
+  { id: "keto", label: "Keto", icon: Beef }, 
   { id: "paleo", label: "Paleo", icon: Bone },
-  { id: "low-carb", label: "Low-Carb" },
-  { id: "nut-free", label: "Nut-Free" },
-  { id: "soy-free", label: "Soy-Free" },
+  { id: "low-carb", label: "Low-Carb", icon: Sprout }, 
+  { id: "nut-free", label: "Nut-Free", icon: Shrub }, 
+  { id: "soy-free", label: "Soy-Free", icon: Sprout },
   { id: "non-vegetarian", label: "Non-Vegetarian", icon: Drumstick },
+  { id: "egg-free", label: "Egg-Free", icon: Feather }, 
+  { id: "shellfish-free", label: "Shellfish-Free", icon: Shell },
 ];
 
 const healthSpecificOptions = [
-  { id: "low-sugar", label: "Low Sugar" },
-  { id: "low-sodium", label: "Low Sodium" },
-  { id: "high-protein", label: "High Protein" },
-  { id: "low-calorie", label: "Low Calorie" },
+  { id: "low-sugar", label: "Low Sugar", icon: Apple }, 
+  { id: "low-sodium", label: "Low Sodium", icon: Thermometer }, 
+  { id: "high-protein", label: "High Protein", icon: Beef }, 
+  { id: "low-calorie", label: "Low Calorie", icon: Feather }, 
+  { id: "high-fiber", label: "High Fiber", icon: Wheat },
 ];
 
 const cuisineOptions = [
-  { id: "indian", label: "Indian" },
-  { id: "italian", label: "Italian" },
-  { id: "mexican", label: "Mexican" },
-  { id: "chinese", label: "Chinese" },
-  { id: "thai", label: "Thai" },
-  { id: "japanese", label: "Japanese" },
-  { id: "mediterranean", label: "Mediterranean" },
-  { id: "french", label: "French" },
-  { id: "american", label: "American" },
-  { id: "middle-eastern", label: "Middle Eastern" },
-  { id: "african", label: "African" },
-  { id: "caribbean", label: "Caribbean" },
-  { id: "other", label: "Other / Fusion" },
+  { id: "indian", label: "Indian", icon: Sprout }, 
+  { id: "italian", label: "Italian", icon: Pizza },
+  { id: "mexican", label: "Mexican", icon: Flame }, 
+  { id: "chinese", label: "Chinese", icon: Sprout },
+  { id: "thai", label: "Thai", icon: Sprout },
+  { id: "japanese", label: "Japanese", icon: Fish },
+  { id: "mediterranean", label: "Mediterranean", icon: Leaf },
+  { id: "french", label: "French", icon: Croissant },
+  { id: "american", label: "American", icon: Beef }, 
+  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout },
+  { id: "african", label: "African", icon: Sprout },
+  { id: "caribbean", label: "Caribbean", icon: Fish },
+  { id: "greek", label: "Greek", icon: Leaf },
+  { id: "spanish", label: "Spanish", icon: Fish },
+  { id: "vietnamese", label: "Vietnamese", icon: Sprout },
+  { id: "korean", label: "Korean", icon: Sprout },
+  { id: "german", label: "German", icon: Drumstick }, 
+  { id: "other", label: "Other / Fusion", icon: Sparkle },
 ];
 
 const cookingMethodOptions = [
-  { id: "baking", label: "Baking" },
-  { id: "frying", label: "Frying" },
-  { id: "grilling", label: "Grilling" },
-  { id: "steaming", label: "Steaming" },
-  { id: "roasting", label: "Roasting" },
-  { id: "slow-cooking", label: "Slow Cooking" },
-  { id: "stir-frying", label: "Stir-Frying" },
-  { id: "boiling", label: "Boiling" },
-  { id: "no-cook", label: "No-Cook / Raw" },
+  { id: "baking", label: "Baking", icon: CakeSlice },
+  { id: "frying", label: "Frying", icon: Utensils }, 
+  { id: "grilling", label: "Grilling", icon: Flame },
+  { id: "steaming", label: "Steaming", icon: Soup }, 
+  { id: "roasting", label: "Roasting", icon: Turkey }, 
+  { id: "slow-cooking", label: "Slow Cooking", icon: Clock },
+  { id: "stir-frying", label: "Stir-Frying", icon: Utensils },
+  { id: "boiling", label: "Boiling", icon: Soup },
+  { id: "no-cook", label: "No-Cook / Raw", icon: Salad },
+  { id: "pressure-cooking", label: "Pressure Cooking", icon: Gauge },
+  { id: "air-frying", label: "Air Frying", icon: Wind },
+  { id: "microwaving", label: "Microwaving", icon: Sparkles }, 
 ];
 
 const mealTypeOptions = [
-  { id: "breakfast", label: "Breakfast" },
-  { id: "lunch", label: "Lunch" },
-  { id: "dinner", label: "Dinner" },
-  { id: "snack", label: "Snack" },
-  { id: "dessert", label: "Dessert" },
-  { id: "appetizer", label: "Appetizer" },
-  { id: "brunch", label: "Brunch" },
-  { id: "side-dish", label: "Side Dish" },
+  { id: "breakfast", label: "Breakfast", icon: Coffee },
+  { id: "lunch", label: "Lunch", icon: Sandwich },
+  { id: "dinner", label: "Dinner", icon: Soup },
+  { id: "snack", label: "Snack", icon: Cookie },
+  { id: "dessert", label: "Dessert", icon: IceCream },
+  { id: "appetizer", label: "Appetizer", icon: Grape },
+  { id: "brunch", label: "Brunch", icon: Croissant },
+  { id: "side-dish", label: "Side Dish", icon: Salad },
 ];
 
 
@@ -136,19 +150,19 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
   const renderCheckboxGroup = (fieldName: keyof RecipeFormValues, options: Array<{id: string, label: string, icon?: React.ElementType}>) => (
      <FormField
       control={form.control}
-      name={fieldName as any} // Added 'as any' to bypass strict type checking for dynamic field name
+      name={fieldName as any} 
       render={() => (
         <FormItem>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {options.map((item) => (
               <FormField
                 key={item.id}
                 control={form.control}
-                name={fieldName as any} // Added 'as any'
+                name={fieldName as any} 
                 render={({ field }) => {
                   const Icon = item.icon;
                   return (
-                    <FormItem key={item.id} className="flex flex-row items-center space-x-2 space-y-0 p-2 hover:bg-muted/30 rounded-md transition-colors has-[:checked]:bg-primary/10 has-[:checked]:border-primary border border-transparent">
+                    <FormItem key={item.id} className="flex flex-row items-center space-x-2 space-y-0 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-all duration-200 ease-in-out cursor-pointer">
                       <FormControl>
                         <Checkbox
                           checked={Array.isArray(field.value) && field.value?.includes(item.id)}
@@ -164,9 +178,9 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                           }}
                         />
                       </FormControl>
-                      <FormLabel className="font-normal cursor-pointer flex items-center gap-1.5 text-sm">
-                        {Icon && <Icon className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />}
-                        {item.label}
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 text-sm flex-1">
+                        {Icon && <Icon className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />}
+                        <span>{item.label}</span>
                       </FormLabel>
                     </FormItem>
                   );
@@ -322,7 +336,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                           <RadioGroup
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-3"
                           >
                             {[
                               { value: "any", label: "Any" },
@@ -331,7 +345,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                               { value: "spicy", label: "Spicy" },
                               { value: "very_spicy", label: "Very Spicy" },
                             ].map(opt => (
-                              <FormItem key={opt.value} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/30 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors">
+                              <FormItem key={opt.value} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-all duration-200 ease-in-out cursor-pointer">
                                 <FormControl>
                                   <RadioGroupItem value={opt.value} id={`spice-${opt.value}`} />
                                 </FormControl>
@@ -379,7 +393,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                           <RadioGroup
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-3"
                           >
                             {[
                               { value: "any", label: "Any" },
@@ -389,7 +403,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                               { value: "1hour", label: "Approx. 1 hour" },
                               { value: "customTime", label: "Custom" },
                             ].map(opt => (
-                              <FormItem key={opt.value} className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/30 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors">
+                              <FormItem key={opt.value} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-all duration-200 ease-in-out cursor-pointer">
                                 <FormControl>
                                   <RadioGroupItem value={opt.value} id={`cookTime-${opt.value}`} />
                                 </FormControl>
@@ -451,4 +465,3 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
-
