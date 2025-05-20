@@ -21,7 +21,7 @@ export type GenerateRecipeInput = z.infer<typeof GenerateRecipeInputSchema>;
 const RecipeDetailsSchema = z.object({
   title: z.string().describe('The title of the recipe.'),
   ingredients: z.array(z.string()).describe('A list of ingredients for the recipe. Ensure quantities are appropriate for the specified number of servings.'),
-  instructions: z.string().describe('The instructions for preparing the recipe.'),
+  instructions: z.string().describe('The instructions for preparing the recipe. Try to include relevant food or cooking action emojis (e.g., 🔪, 🔥, 🥣) where appropriate to make steps clearer and more engaging. Use an expressive and friendly tone; an occasional appropriate face emoji is fine if it fits naturally.'),
   servings: z.number().describe('The number of servings this recipe is for. This should match the user-specified servings if provided in the prompt; otherwise, choose a reasonable default (e.g., 2-4).'),
 });
 
@@ -40,7 +40,7 @@ const generateRecipeDetailsPrompt = ai.definePrompt({
   output: {schema: RecipeDetailsSchema},
   prompt: `You are an expert recipe generating AI. Generate a detailed recipe based on the following user preferences and prompt:\n\nUser Preferences & Prompt:\n{{{prompt}}}\n\nCrucially, if the prompt specifies a number of servings, ensure the generated recipe (ingredients and output 'servings' field) adheres to that number. If no servings are specified, default to a reasonable number (e.g., 2 or 4 servings) and reflect this in the 'servings' field of your output.
 The ingredients list should be an array of strings, where each string describes one ingredient (e.g., "1 cup flour", "2 large eggs, beaten").
-The instructions should be a clear, step-by-step guide.
+The instructions should be a clear, step-by-step guide. Where appropriate, include relevant food or cooking action emojis (e.g., 🔪 for chop, 🔥 for cook, 🥣 for mix) to make the steps clearer and more engaging. Feel free to use a friendly and expressive tone; an occasional face emoji (like 😊 or 🤔) is okay if it fits naturally within the instructions and enhances readability.
 The title should be appealing and relevant to the recipe.
 
 Format the output strictly as a JSON object with 'title' (string), 'ingredients' (array of strings), 'instructions' (string), and 'servings' (number) fields.
@@ -88,3 +88,4 @@ const generateRecipeFlow = ai.defineFlow(
     };
   }
 );
+
