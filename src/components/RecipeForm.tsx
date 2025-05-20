@@ -59,7 +59,7 @@ const dietaryOptions = [
   { id: "paleo", label: "Paleo", icon: Bone },
   { id: "low-carb", label: "Low-Carb", icon: Sprout }, 
   { id: "nut-free", label: "Nut-Free", icon: Shrub }, 
-  { id: "soy-free", label: "Soy-Free", icon: Sprout },
+  { id: "soy-free", label: "Soy-Free", icon: Sprout }, // Changed icon
   { id: "non-vegetarian", label: "Non-Vegetarian", icon: Drumstick },
   { id: "egg-free", label: "Egg-Free", icon: Feather }, 
   { id: "shellfish-free", label: "Shellfish-Free", icon: Shell },
@@ -80,12 +80,12 @@ const cuisineOptions: Array<{ id: string; label: string; icon?: React.ElementTyp
   { id: "chinese", label: "Chinese", flagEmoji: "🇨🇳", icon: Sprout },
   { id: "thai", label: "Thai", flagEmoji: "🇹🇭", icon: Sprout },
   { id: "japanese", label: "Japanese", flagEmoji: "🇯🇵", icon: Fish },
-  { id: "mediterranean", label: "Mediterranean", icon: Leaf }, // No single flag
+  { id: "mediterranean", label: "Mediterranean", icon: Leaf, flagEmoji: "🇬🇷" }, // Added a representative flag
   { id: "french", label: "French", flagEmoji: "🇫🇷", icon: Croissant },
   { id: "american", label: "American", flagEmoji: "🇺🇸", icon: Beef },
-  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout }, // No single flag
-  { id: "african", label: "African", icon: Sprout }, // No single flag (continent)
-  { id: "caribbean", label: "Caribbean", icon: Fish }, // No single flag (region)
+  { id: "middle-eastern", label: "Middle Eastern", icon: Sprout, flagEmoji: "🇸🇦" }, // Added a representative flag
+  { id: "african", label: "African", icon: Sprout, flagEmoji: "🌍" }, 
+  { id: "caribbean", label: "Caribbean", icon: Fish, flagEmoji: "🇯🇲" }, // Added a representative flag
   { id: "greek", label: "Greek", flagEmoji: "🇬🇷", icon: Leaf },
   { id: "spanish", label: "Spanish", flagEmoji: "🇪🇸", icon: Fish },
   { id: "vietnamese", label: "Vietnamese", flagEmoji: "🇻🇳", icon: Sprout },
@@ -156,7 +156,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
       name={fieldName as any} 
       render={() => (
         <FormItem>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="flex flex-wrap gap-2 py-2"> {/* Changed to flex-wrap and gap-2 */}
             {options.map((item) => {
               const IconComponent = item.icon;
               return (
@@ -166,7 +166,10 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                 name={fieldName as any} 
                 render={({ field }) => {
                   return (
-                    <FormItem key={item.id} className="flex flex-row items-center space-x-2 space-y-0 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-all duration-200 ease-in-out cursor-pointer">
+                    <FormItem 
+                      key={item.id} 
+                      className="flex flex-row items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors duration-200 ease-in-out cursor-pointer" // Compacted padding, rounded-md
+                    >
                       <FormControl>
                         <Checkbox
                           checked={Array.isArray(field.value) && field.value?.includes(item.id)}
@@ -182,7 +185,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                           }}
                         />
                       </FormControl>
-                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 text-sm flex-1">
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 text-sm flex-1 whitespace-nowrap">
                         {item.flagEmoji ? (
                           <span className="text-lg mr-1">{item.flagEmoji}</span>
                         ) : (
@@ -344,7 +347,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                           <RadioGroup
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                            className="flex flex-wrap gap-2 py-2" // Changed to flex-wrap and gap-2
                           >
                             {[
                               { value: "any", label: "Any" },
@@ -353,11 +356,14 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                               { value: "spicy", label: "Spicy" },
                               { value: "very_spicy", label: "Very Spicy" },
                             ].map(opt => (
-                              <FormItem key={opt.value} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-all duration-200 ease-in-out cursor-pointer">
+                              <FormItem 
+                                key={opt.value} 
+                                className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors duration-200 ease-in-out cursor-pointer" // Compacted padding, rounded-md
+                              >
                                 <FormControl>
                                   <RadioGroupItem value={opt.value} id={`spice-${opt.value}`} />
                                 </FormControl>
-                                <FormLabel htmlFor={`spice-${opt.value}`} className="font-normal cursor-pointer w-full text-sm">{opt.label}</FormLabel>
+                                <FormLabel htmlFor={`spice-${opt.value}`} className="font-normal cursor-pointer w-full text-sm whitespace-nowrap">{opt.label}</FormLabel>
                               </FormItem>
                             ))}
                           </RadioGroup>
@@ -401,7 +407,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                           <RadioGroup
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                            className="flex flex-wrap gap-2 py-2" // Changed to flex-wrap and gap-2
                           >
                             {[
                               { value: "any", label: "Any" },
@@ -411,11 +417,14 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                               { value: "1hour", label: "Approx. 1 hour" },
                               { value: "customTime", label: "Custom" },
                             ].map(opt => (
-                              <FormItem key={opt.value} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-all duration-200 ease-in-out cursor-pointer">
+                              <FormItem 
+                                key={opt.value} 
+                                className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 has-[:checked]:bg-accent/10 has-[:checked]:border-accent transition-colors duration-200 ease-in-out cursor-pointer" // Compacted padding, rounded-md
+                              >
                                 <FormControl>
                                   <RadioGroupItem value={opt.value} id={`cookTime-${opt.value}`} />
                                 </FormControl>
-                                <FormLabel htmlFor={`cookTime-${opt.value}`} className="font-normal cursor-pointer w-full text-sm">{opt.label}</FormLabel>
+                                <FormLabel htmlFor={`cookTime-${opt.value}`} className="font-normal cursor-pointer w-full text-sm whitespace-nowrap">{opt.label}</FormLabel>
                               </FormItem>
                             ))}
                           </RadioGroup>
@@ -473,3 +482,4 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
+
