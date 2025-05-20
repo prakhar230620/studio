@@ -87,11 +87,11 @@ const ingredientEmojiMap: Record<string, string> = {
   salt: '🧂', 'black salt': '🧂',
   'olive oil': '🫒', 'extra virgin olive oil': '🫒',
   'vegetable oil': '🛢️', 'sunflower oil': '🌻', 'canola oil': '🛢️', 'corn oil': '🌽', 'sesame oil': '🌰',
-  'mustard oil': '🌻', // Updated for mustard oil
+  'mustard oil': '🌻',
   'coconut oil': '🥥',
   oil: '🛢️', // Generic oil
   vinegar: '🍾', 'apple cider vinegar': '🍎', 'white vinegar': '🍾', 'balsamic vinegar': '🍾',
-  yeast: '🧱', // Brown square as placeholder
+  yeast: '🟫', 'active dry yeast': '🟫', 'instant yeast': '🟫', // Updated yeast emoji
 
   // Dairy & Alternatives
   milk: '🥛', 'cow milk': '🥛',
@@ -132,7 +132,7 @@ const ingredientEmojiMap: Record<string, string> = {
   sage: '🌿',
   cumin: '🌿', 'cumin powder': '🌿', 'cumin seeds': '🌿', 'jeera': '🌿',
   turmeric: '🟡', 'turmeric powder': '🟡', 'haldi': '🟡',
-  ginger: '🫚', 'ginger-garlic paste': '🧄', // Prioritize garlic if both are there, or could use ginger
+  ginger: '🫚', 'ginger-garlic paste': '🧄',
   cinnamon: '🌿', 'cinnamon stick': '🌿', 'cinnamon powder': '🌿',
   nutmeg: '🌰', // Using nut for nutmeg
   clove: '🌿', 'cloves': '🌿',
@@ -149,7 +149,7 @@ const ingredientEmojiMap: Record<string, string> = {
   'fenugreek seeds': '🌿', 'methi seeds': '🌿', 'fenugreek': '🌿',
   'fennel seeds': '🌿', 'saunf': '🌿',
   'asafoetida': '💨', 'hing': '💨', // Puff of smoke
-  'ajwain': '🌿', 'carom seeds': '🌿', // Added Ajwain/Carom seeds
+  'ajwain': '🌿', 'carom seeds': '🌿',
 
   // Nuts & Seeds
   almond: '🌰', almonds: '🌰',
@@ -202,6 +202,8 @@ const ingredientEmojiMap: Record<string, string> = {
   breadcrumbs: '🍞',
   pickle: '🥒', pickles: '🥒',
   olives: '🫒', 'black olives': '⚫', 'green olives': '🟢',
+  'pizza sauce': '🍕', // More specific sauce for pizza
+  'pasta sauce': '🍝', // More specific sauce for pasta
 
   // Common recipe keywords that are not single ingredients (less priority, matched if specific ingredient isn't)
   curry: '🍛',
@@ -218,8 +220,6 @@ const ingredientEmojiMap: Record<string, string> = {
   smoothie: '🥤',
   juice: '🧃',
   sauce: '🥫', // Generic sauce
-  'pizza sauce': '🍕', // More specific sauce
-  'pasta sauce': '🍝', // More specific sauce
   dressing: '🥗', // Salad for dressing
   gravy: '🥣',
   stew: '🥘',
@@ -236,14 +236,14 @@ const ingredientEmojiMap: Record<string, string> = {
 
 // Order of keywords matters if one is a substring of another.
 // This array helps process longer keywords first.
+// Prioritize phrases (containing spaces) if lengths are equal.
 const sortedEmojiKeywords = Object.keys(ingredientEmojiMap).sort((a, b) => {
   if (b.length === a.length) {
-    // If lengths are equal, prioritize keys that are phrases (contain spaces)
-    // This helps "green chili" match before "chili" if "green chili" is the exact phrase.
     const aIsPhrase = a.includes(' ');
     const bIsPhrase = b.includes(' ');
     if (aIsPhrase && !bIsPhrase) return -1;
     if (!aIsPhrase && bIsPhrase) return 1;
+    return 0; // Keep original order if lengths and phrase status are same
   }
   return b.length - a.length;
 });
@@ -254,9 +254,9 @@ export function getEmojiForIngredient(ingredientName: string): string {
   // Prioritize exact or near-exact matches for longer phrases first
   for (const keyword of sortedEmojiKeywords) {
     // Regex for whole word matching (or phrase matching)
-    const pattern = keyword.includes(' ') 
-      ? `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b` 
-      : `\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`;
+    // Escape special regex characters in the keyword
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = `\\b${escapedKeyword}\\b`;
     const regex = new RegExp(pattern, 'i');
     if (regex.test(nameLower)) {
       return ingredientEmojiMap[keyword];
@@ -264,7 +264,6 @@ export function getEmojiForIngredient(ingredientName: string): string {
   }
 
   // Fallback: If no specific regex match, try a general includes for broader matching, still prioritizing longer keywords
-  // This helps if the ingredient is "finely chopped green onions" and we have "green onion" or "onion"
   for (const keyword of sortedEmojiKeywords) {
       if (nameLower.includes(keyword)) {
           return ingredientEmojiMap[keyword];
@@ -272,3 +271,4 @@ export function getEmojiForIngredient(ingredientName: string): string {
   }
   return ''; // No emoji if no match
 }
+
