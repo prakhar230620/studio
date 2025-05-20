@@ -16,7 +16,6 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 export default function HomePage() {
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
   const [favorites, setFavorites] = useLocalStorage<Recipe[]>('favoriteRecipes', []);
-  // const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []); // Removed
 
   const mutation = useMutation({
     mutationFn: (data: { prompt: string; baseServings?: number }) => handleGenerateRecipeAction(data),
@@ -40,9 +39,10 @@ export default function HomePage() {
     
     let detailedPrompt = data.mainPrompt;
 
-    if (data.recipeName) {
-      detailedPrompt += `\nThe recipe should ideally be titled something like or related to: "${data.recipeName}".`;
-    }
+    // RecipeName is removed from form, so this block is no longer needed.
+    // if (data.recipeName) {
+    //   detailedPrompt += `\nThe recipe should ideally be titled something like or related to: "${data.recipeName}".`;
+    // }
     if (data.servings) {
       detailedPrompt += `\nIt absolutely must serve ${data.servings} people. The ingredients listed should be for this many servings. Ensure the 'servings' field in your output correctly reflects this number.`;
     }
@@ -80,8 +80,6 @@ export default function HomePage() {
     }
   };
 
-  // handleAddToShoppingList function removed
-
   return (
     <div className="flex flex-col items-center space-y-8 py-8">
       <RecipeForm 
@@ -94,7 +92,6 @@ export default function HomePage() {
       {currentRecipe && (
         <RecipeDisplay 
           recipe={currentRecipe} 
-          // onAddToShoppingList prop removed
           onToggleFavorite={handleToggleFavorite}
         />
       )}

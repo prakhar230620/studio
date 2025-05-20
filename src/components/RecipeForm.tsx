@@ -15,12 +15,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Type } from "lucide-react";
+import { Loader2, Users, Sparkles, Clock, Salad, Utensils, HeartPulse, Flame, Minus, Plus } from "lucide-react";
 import type { Recipe } from '@/lib/types';
 
 const recipeFormSchema = z.object({
   mainPrompt: z.string().min(1, "Please describe your recipe idea."),
-  recipeName: z.string().optional(),
+  // recipeName: z.string().optional(), // Removed recipeName
   servings: z.coerce.number().min(1, "Servings must be at least 1.").default(2),
   dietaryPreferences: z.array(z.string()).optional(),
   cookTimeOption: z.enum(["any", "15min", "30min", "45min", "1hour", "customTime"]).default("any"),
@@ -33,7 +33,7 @@ const recipeFormSchema = z.object({
   return true;
 }, {
   message: "Please enter a valid custom cook time (at least 1 minute).",
-  path: ["customCookTime"], // Path to the field that the error message will be associated with
+  path: ["customCookTime"],
 });
 
 export type RecipeFormValues = z.infer<typeof recipeFormSchema>;
@@ -73,9 +73,9 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
   });
 
   const watchedCookTimeOption = form.watch("cookTimeOption");
+  const watchedServings = form.watch("servings");
 
   const handleSubmit: SubmitHandler<RecipeFormValues> = async (data) => {
-    // Clear customCookTime if not "customTime" to avoid sending it
     if (data.cookTimeOption !== "customTime") {
       data.customCookTime = undefined;
     }
@@ -117,33 +117,72 @@ export function RecipeForm({ onRecipeGenerated, isLoading, onSubmitPrompt, error
             />
 
             <Accordion type="multiple" className="w-full space-y-4">
-              <AccordionItem value="details" className="border rounded-lg shadow-sm overflow-hidden">
+              <AccordionItem value="servings" className="border rounded-lg shadow-sm overflow-hidden">
                 <AccordionTrigger className="px-6 py-4 text-lg font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30">
-                  <div className="flex items-center gap-2"><Type className="text-accent h-5 w-5" /> Recipe Title & Servings</div>
+                  <div className="flex items-center gap-2"><Users className="text-accent h-5 w-5" /> Number of Servings</div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 space-y-6 bg-background/50">
-                  <FormField
-                    control={form.control}
-                    name="recipeName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="recipeName" className="font-semibold">Suggest a Recipe Name (Optional)</FormLabel>
-                        <FormControl>
-                          <Input id="recipeName" placeholder="e.g., 'Grandma's Apple Pie'" {...field} className="text-base p-3" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="servings"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel htmlFor="servings" className="font-semibold flex items-center gap-1"><Users className="h-4 w-4" /> Number of Servings</FormLabel>
-                        <FormControl>
-                          <Input id="servings" type="number" min="1" {...field} className="text-base p-3 w-24" />
-                        </FormControl>
+                        <FormLabel htmlFor="servings-input" className="font-semibold flex items-center gap-1 sr-only">Number of Servings</FormLabel>
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              const currentValue = typeof field.value === 'number' ? field.value : parseInt(String(field.value), 10) || 2;
+                              if (currentValue > 1) {
+                                form.setValue("servings", currentValue - 1, { shouldValidate: true });
+                              }
+                            }}
+                            disabled={watchedServings <= 1}
+                            aria-label="Decrease servings"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <FormControl>
+                            <Input
+                              id="servings-input"
+                              type="number"
+                              min="1"
+                              {...field}
+                              onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (value === "") {
+                                    field.onChange(""); // Allow empty for intermediate typing
+                                  } else {
+                                    const numValue = parseInt(value, 10);
+                                    if (!isNaN(numValue) && numValue >=1) {
+                                        field.onChange(numValue);
+                                    }
+                                  }
+                              }}
+                              onBlur={(e) => { // Validate on blur if empty or less than 1
+                                const value = parseInt(String(field.value),10);
+                                if (isNaN(value) || value < 1) {
+                                    form.setValue("servings", 1, { shouldValidate: true });
+                                }
+                              }}
+                              className="text-base p-3 w-20 text-center"
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              const currentValue = typeof field.value === 'number' ? field.value : parseInt(String(field.value), 10) || 1;
+                              form.setValue("servings", currentValue + 1, { shouldValidate: true });
+                            }}
+                            aria-label="Increase servings"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
