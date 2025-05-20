@@ -7,15 +7,16 @@ import { useMutation } from '@tanstack/react-query';
 import { RecipeForm, type RecipeFormValues } from '@/components/RecipeForm';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { handleGenerateRecipeAction } from '@/lib/actions';
-import type { Recipe, ShoppingListItem } from '@/lib/types';
+import type { Recipe } from '@/lib/types';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+// Alert components are not used here anymore if error handling is solely in RecipeForm
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+// import { Terminal } from "lucide-react";
 
 export default function HomePage() {
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
   const [favorites, setFavorites] = useLocalStorage<Recipe[]>('favoriteRecipes', []);
-  const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []);
+  // const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []); // Removed
 
   const mutation = useMutation({
     mutationFn: (data: { prompt: string; baseServings?: number }) => handleGenerateRecipeAction(data),
@@ -79,25 +80,12 @@ export default function HomePage() {
     }
   };
 
-  const handleAddToShoppingList = (items: ShoppingListItem[]) => {
-    setShoppingList(prevList => {
-      const newList = [...prevList];
-      items.forEach(item => {
-        const existingItemIndex = newList.findIndex(i => i.name === item.name && i.unit === item.unit && i.recipeTitle === item.recipeTitle);
-        if (existingItemIndex > -1) {
-          newList[existingItemIndex].quantity += item.quantity;
-        } else {
-          newList.push(item);
-        }
-      });
-      return newList;
-    });
-  };
+  // handleAddToShoppingList function removed
 
   return (
     <div className="flex flex-col items-center space-y-8 py-8">
       <RecipeForm 
-        onRecipeGenerated={(recipe) => setCurrentRecipe(recipe)}
+        onRecipeGenerated={(recipe) => setCurrentRecipe(recipe)} // This prop might not be needed if RecipeForm directly calls onSubmitPrompt
         isLoading={mutation.isPending}
         onSubmitPrompt={handleFormSubmit}
         error={mutation.isError ? (mutation.error as Error).message : (mutation.data && 'error' in mutation.data ? mutation.data.error : null)}
@@ -106,7 +94,7 @@ export default function HomePage() {
       {currentRecipe && (
         <RecipeDisplay 
           recipe={currentRecipe} 
-          onAddToShoppingList={handleAddToShoppingList}
+          // onAddToShoppingList prop removed
           onToggleFavorite={handleToggleFavorite}
         />
       )}

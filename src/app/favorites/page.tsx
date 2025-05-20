@@ -1,13 +1,14 @@
+
 // src/app/favorites/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import type { Recipe, ShoppingListItem } from '@/lib/types';
+import type { Recipe } from '@/lib/types'; // ShoppingListItem removed
 import { RecipeCard } from '@/components/RecipeCard';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { Button } from '@/components/ui/button';
-import { HeartCrack, Trash2, CheckCircle } from 'lucide-react'; // Added CheckCircle
+import { HeartCrack, Trash2, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -24,7 +25,7 @@ import {
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useLocalStorage<Recipe[]>('favoriteRecipes', []);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []);
+  // const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []); // Removed
   const { toast } = useToast();
 
   // Client-side check for hydration mismatch
@@ -56,33 +57,14 @@ export default function FavoritesPage() {
   };
   
   const handleSelectRecipe = (recipe: Recipe) => {
-    // Ensure the selected recipe reflects its current favorite status from the source of truth (localStorage)
     const currentFavoriteStatus = favorites.find(fav => fav.id === recipe.id)?.isFavorite || false;
     setSelectedRecipe({...recipe, isFavorite: currentFavoriteStatus});
   };
 
-  const handleAddToShoppingList = (items: ShoppingListItem[]) => {
-    setShoppingList(prevList => {
-      const newList = [...prevList];
-      items.forEach(item => {
-        const existingItemIndex = newList.findIndex(i => i.name === item.name && i.unit === item.unit && i.recipeTitle === item.recipeTitle);
-        if (existingItemIndex > -1) {
-          newList[existingItemIndex].quantity += item.quantity;
-        } else {
-          newList.push(item);
-        }
-      });
-      return newList;
-    });
-     toast({
-      title: "Added to Shopping List!",
-      description: `Ingredients are now in your list.`,
-      action: <CheckCircle className="text-green-500" />
-    });
-  };
+  // handleAddToShoppingList function removed
 
   if (!isClient) {
-    return ( // Skeleton or loading state for SSR/hydration
+    return ( 
       <div className="space-y-6">
         <h1 className="text-3xl font-bold text-primary">My Favorite Recipes</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -117,7 +99,7 @@ export default function FavoritesPage() {
             <RecipeDisplay 
               recipe={selectedRecipe} 
               onToggleFavorite={handleToggleFavorite}
-              onAddToShoppingList={handleAddToShoppingList}
+              // onAddToShoppingList prop removed
             />
             <Button onClick={() => setSelectedRecipe(null)} variant="outline" className="mt-4 w-full">
               Close Recipe
@@ -129,10 +111,10 @@ export default function FavoritesPage() {
           {favorites.map(recipe => (
             <RecipeCard 
               key={recipe.id} 
-              recipe={{...recipe, isFavorite: true}} // Ensure isFavorite is true when rendering from favorites
+              recipe={{...recipe, isFavorite: true}} 
               onToggleFavorite={handleToggleFavorite}
               onSelectRecipe={handleSelectRecipe}
-              className="animate-fadeIn" // Added animation class
+              className="animate-fadeIn"
             />
           ))}
         </div>
@@ -156,11 +138,11 @@ export default function FavoritesPage() {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={() => {
                   setFavorites([]);
-                  setSelectedRecipe(null); // Clear selected recipe if any was shown
+                  setSelectedRecipe(null); 
                   toast({ 
                     title: "Favorites Cleared", 
                     description: "All your favorite recipes have been removed.",
-                    action: <Trash2 className="text-destructive" />
+                    action: <Trash2 className="text-destructive h-5 w-5" />
                   });
                 }}>
                   Yes, Clear All

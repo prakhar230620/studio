@@ -19,12 +19,4 @@ export interface Recipe {
   isFavorite?: boolean;
 }
 
-export interface ShoppingListItem {
-  id: string; // Can be ingredient id + recipe id to be unique
-  name: string;
-  quantity: number;
-  unit: string;
-  checked: boolean;
-  recipeTitle?: string;
-  // price?: number; // Removed simulated price
-}
+// ShoppingListItem interface removed

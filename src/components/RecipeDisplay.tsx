@@ -5,23 +5,23 @@
 import type React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"; // CardDescription removed as not used
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Heart, ShoppingCart, Plus, Minus, CheckCircle, ChefHat } from "lucide-react";
-import type { Recipe, Ingredient, ShoppingListItem } from '@/lib/types';
+import { Heart, Plus, Minus, ChefHat } from "lucide-react"; // ShoppingCart, CheckCircle removed
+import type { Recipe } from '@/lib/types'; // Ingredient, ShoppingListItem removed, not directly used here but Recipe uses Ingredient
 import { useToast } from "@/hooks/use-toast";
-import useLocalStorage from '@/hooks/useLocalStorage';
+// useLocalStorage removed, not used here
 
 interface RecipeDisplayProps {
   recipe: Recipe;
-  onAddToShoppingList: (items: ShoppingListItem[]) => void;
+  // onAddToShoppingList: (items: ShoppingListItem[]) => void; // Removed
   onToggleFavorite: (recipe: Recipe) => void;
 }
 
-export function RecipeDisplay({ recipe, onAddToShoppingList, onToggleFavorite }: RecipeDisplayProps) {
+export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) {
   const [currentServings, setCurrentServings] = useState<number>(recipe.servings);
   const { toast } = useToast();
   const [isFavorited, setIsFavorited] = useState(recipe.isFavorite || false);
@@ -46,22 +46,7 @@ export function RecipeDisplay({ recipe, onAddToShoppingList, onToggleFavorite }:
     }
   };
 
-  const handleAddAllToShoppingList = () => {
-    const items: ShoppingListItem[] = adjustedIngredients.map(ing => ({
-      id: `${recipe.id}-${ing.id}`,
-      name: ing.name,
-      quantity: ing.quantity,
-      unit: ing.unit,
-      checked: false,
-      recipeTitle: recipe.title,
-    }));
-    onAddToShoppingList(items);
-    toast({
-      title: "Added to Shopping List!",
-      description: `${recipe.title} ingredients are now in your list.`,
-      action: <CheckCircle className="text-green-500" />,
-    });
-  };
+  // handleAddAllToShoppingList function removed
 
   const handleToggleFavorite = () => {
     const newFavoriteStatus = !isFavorited;
@@ -142,15 +127,12 @@ export function RecipeDisplay({ recipe, onAddToShoppingList, onToggleFavorite }:
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 p-6 border-t">
+      <CardFooter className="flex flex-col sm:flex-row justify-center gap-4 p-6 border-t"> {/* Centered the favorite button */}
         <Button variant={isFavorited ? "secondary" : "outline"} onClick={handleToggleFavorite} className="w-full sm:w-auto text-base py-3">
           <Heart className={`mr-2 h-5 w-5 ${isFavorited ? 'text-red-500 fill-red-500' : ''}`} />
           {isFavorited ? 'Favorited' : 'Add to Favorites'}
         </Button>
-        <Button onClick={handleAddAllToShoppingList} className="w-full sm:w-auto text-base py-3 bg-accent hover:bg-accent/90">
-          <ShoppingCart className="mr-2 h-5 w-5" />
-          Add All to Shopping List
-        </Button>
+        {/* Add to Shopping List Button Removed */}
       </CardFooter>
     </Card>
   );

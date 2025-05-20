@@ -104,88 +104,20 @@
 
   /* Hide non-essential elements */
   header.sticky, /* Navbar */
-  body > footer, /* Main footer */
-  .recipe-filter-card,
-  .manual-add-item-card,
-  .page-actions-buttons-container, /* Container for Print/Share buttons */
-  .shopping-list-footer-actions, /* CardFooter in ShoppingListDisplay containing Clear Checked/All */
-  .clear-all-underlying-data-button-container, /* Container for the "Clear All Underlying Shopping Data" button */
-  .shopping-list-item-actions /* Container for toggle unit and remove item buttons within each list item */
+  body > footer /* Main footer */
+  /* Removed shopping list specific classes like:
+     .recipe-filter-card,
+     .manual-add-item-card,
+     .page-actions-buttons-container,
+     .shopping-list-footer-actions,
+     .clear-all-underlying-data-button-container,
+     .shopping-list-item-actions
+  */
   {
     display: none !important;
   }
 
-  /* Style the shopping list display for print */
-  .shopping-list-display-card {
-    box-shadow: none !important;
-    border: none !important;
-    margin-top: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-   .shopping-list-display-card .card-header, /* CardHeader within ShoppingListDisplay */
-   .shopping-list-display-card > .card-content > .card-footer /* CardFooter within ShoppingListDisplay */
-   {
-    display: block !important; /* Ensure CardHeader is visible */
-    padding-bottom: 0.5rem !important;
-    border-bottom: 1px solid #ccc; /* Add a line under the title for print */
-  }
-  .shopping-list-display-card .card-header .card-title {
-     font-size: 1.5rem !important;
-     text-align: left !important;
-  }
-
-  .shopping-list-display-card ul {
-    padding: 0 !important;
-    margin: 0 !important;
-    list-style: none !important;
-  }
-  .shopping-list-display-card li {
-    page-break-inside: avoid;
-    border-bottom: 1px dotted #eee;
-    padding: 0.3rem 0 !important;
-    display: flex !important;
-    align-items: flex-start !important;
-  }
-  .shopping-list-display-card li:last-child {
-    border-bottom: none;
-  }
-  
-  .shopping-list-display-card .hide-on-print {
-    display: none !important;
-  }
-
-  .shopping-list-display-card .checkbox-print-placeholder {
-    display: inline-block;
-    margin-right: 0.5em; /* Space between checkbox placeholder and label */
-    font-family: monospace;
-    line-height: inherit; /* Align with label text */
-  }
-  .shopping-list-display-card .checkbox-print-placeholder.checked::before {
-    content: "[x]";
-  }
-  .shopping-list-display-card .checkbox-print-placeholder:not(.checked)::before {
-    content: "[ ]";
-  }
-  
-  .shopping-list-display-card li label {
-    line-height: inherit; /* Align with checkbox placeholder */
-  }
-  .shopping-list-display-card li label span.font-medium { /* Item name */
-    font-weight: bold; /* Make item name bold for print */
-  }
-  .shopping-list-display-card li label span.text-muted-foreground { /* Quantity and unit */
-    color: #333 !important; /* Darker color for quantity/unit */
-    font-style: italic;
-  }
-  .shopping-list-display-card li.opacity-70 { /* If item was checked, remove opacity for print */
-    opacity: 1 !important;
-  }
-  .shopping-list-display-card li.opacity-70 label.line-through {
-    text-decoration: none !important; /* Remove line-through for print if needed, or keep it */
-  }
+  /* Any generic print styling for recipes, if needed, can remain or be added here.
+     For now, the shopping list specific print styles have been removed.
+  */
 }
-
-
-    

@@ -1,7 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
-import { Utensils, Heart, ShoppingCart, Menu, Sun, Moon } from "lucide-react";
+import { Utensils, Heart, Menu, Sun, Moon } from "lucide-react"; // Removed ShoppingCart
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -10,7 +11,7 @@ import { useTheme } from "next-themes";
 const navItems = [
   { href: "/", label: "Home", icon: <Utensils className="h-5 w-5" /> },
   { href: "/favorites", label: "Favorites", icon: <Heart className="h-5 w-5" /> },
-  { href: "/shopping-list", label: "Shopping List", icon: <ShoppingCart className="h-5 w-5" /> },
+  // { href: "/shopping-list", label: "Shopping List", icon: <ShoppingCart className="h-5 w-5" /> }, // Removed Shopping List
 ];
 
 export function Navbar() {
