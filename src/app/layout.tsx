@@ -17,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="application-name" content="Recipe Ready" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -26,7 +27,8 @@ export default function RootLayout({
         <meta name="msapplication-config" content="/icons/browserconfig.xml" /> 
         <meta name="msapplication-TileColor" content="#db2777" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#db2777" /> 
+        <meta name="theme-color" content="#db2777" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#16141f" media="(prefers-color-scheme: dark)" />
         {/* 
           For actual app icons, you would generate them and place them in public/icons/
           and then link them here, e.g.:
