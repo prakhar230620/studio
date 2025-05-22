@@ -409,7 +409,12 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
               {preferenceCategories.map(category => {
                 const IconComponent = category.icon;
                 return (
-                  <Accordion key={category.id} type="single" collapsible className="min-w-36 w-full sm:w-40 md:w-44 border rounded-lg shadow-sm data-[state=open]:ring-1 data-[state=open]:ring-primary hover:shadow-md transition-shadow bg-card">
+                  <Accordion 
+                    key={category.id} 
+                    type="single" 
+                    collapsible 
+                    className="min-w-36 w-36 sm:w-40 md:w-44 border rounded-lg shadow-sm data-[state=open]:ring-1 data-[state=open]:ring-primary hover:shadow-md transition-shadow bg-card"
+                  >
                     <AccordionItem value={category.id} className="border-0">
                       <AccordionTrigger className="p-3 text-sm font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 w-full data-[state=open]:border-b">
                         <div className="flex flex-col items-center gap-1 w-full">
@@ -447,3 +452,6 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
+
+
+    
