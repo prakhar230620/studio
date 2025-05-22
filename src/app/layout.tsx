@@ -41,7 +41,7 @@ export default function RootLayout({
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <Providers>
           <Navbar />
-          <main className="flex-grow container mx-auto px-4 py-8">
+          <main className="flex-grow container mx-auto px-4 pt-20 pb-8">
             {children}
           </main>
           <footer className="py-6 text-center text-sm text-muted-foreground border-t">
