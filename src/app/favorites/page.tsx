@@ -4,11 +4,11 @@
 
 import { useState, useEffect } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import type { Recipe } from '@/lib/types'; // ShoppingListItem removed
+import type { Recipe } from '@/lib/types';
 import { RecipeCard } from '@/components/RecipeCard';
 import { RecipeDisplay } from '@/components/RecipeDisplay';
 import { Button } from '@/components/ui/button';
-import { HeartCrack, Trash2, CheckCircle } from 'lucide-react';
+import { HeartCrack, Trash2, CheckCircle } from 'lucide-react'; // CheckCircle is not used, can be removed later if not needed
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -25,7 +25,6 @@ import {
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useLocalStorage<Recipe[]>('favoriteRecipes', []);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  // const [shoppingList, setShoppingList] = useLocalStorage<ShoppingListItem[]>('shoppingList', []); // Removed
   const { toast } = useToast();
 
   // Client-side check for hydration mismatch
@@ -52,7 +51,7 @@ export default function FavoritesPage() {
     toast({
         title: "Removed from Favorites",
         description: `${recipeToToggle.title} is no longer a favorite.`,
-        action: <HeartCrack className="text-destructive" />
+        action: <HeartCrack className="text-destructive h-5 w-5" />
     });
   };
   
@@ -60,8 +59,6 @@ export default function FavoritesPage() {
     const currentFavoriteStatus = favorites.find(fav => fav.id === recipe.id)?.isFavorite || false;
     setSelectedRecipe({...recipe, isFavorite: currentFavoriteStatus});
   };
-
-  // handleAddToShoppingList function removed
 
   if (!isClient) {
     return ( 
@@ -94,12 +91,11 @@ export default function FavoritesPage() {
       <h1 className="text-4xl font-bold text-primary tracking-tight">My Favorite Recipes</h1>
       
       {selectedRecipe ? (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 overflow-y-auto p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 overflow-y-auto pt-20 px-4 pb-4 animate-fadeIn">
           <div className="max-w-3xl mx-auto my-8">
             <RecipeDisplay 
               recipe={selectedRecipe} 
               onToggleFavorite={handleToggleFavorite}
-              // onAddToShoppingList prop removed
             />
             <Button onClick={() => setSelectedRecipe(null)} variant="outline" className="mt-4 w-full">
               Close Recipe
