@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Utensils, Heart, Menu, Sun, Moon } from "lucide-react"; // Removed ShoppingCart
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"; // Added SheetTitle
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 
@@ -69,6 +69,7 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] p-0">
+              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle> {/* Added sr-only SheetTitle */}
               <div className="flex flex-col h-full">
                 <div className="p-6 border-b">
                   <Link href="/" className="flex items-center gap-2 text-primary" onClick={() => setIsMobileMenuOpen(false)}>
