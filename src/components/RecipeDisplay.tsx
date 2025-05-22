@@ -90,7 +90,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
       const elementToCapture = recipeCardRef.current;
       
       const originalColors = new Map<HTMLElement, string>();
-      const elementsToStyle = elementToCapture.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, p, span, li, div, label, input, button'); // Added button
+      const elementsToStyle = elementToCapture.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, p, span, li, div, label, input, button'); 
       elementsToStyle.forEach(el => {
         originalColors.set(el, el.style.color);
         el.style.color = 'black'; 
@@ -106,7 +106,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
         onclone: (document) => {
             const imageElement = document.querySelector('.recipe-image-for-pdf') as HTMLImageElement;
             if (imageElement) {
-                //
+                // Placeholder for any specific image handling in clone if needed
             }
             // Hide share/favorite buttons during PDF generation in cloned document
             const footerActions = document.querySelector('.recipe-display-card-footer');
@@ -131,7 +131,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
       });
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       
-      const pdfBlob = pdf.getBlob();
+      const pdfBlob = pdf.output('blob'); // Corrected line
       const pdfFileName = `${recipe.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'recipe'}.pdf`;
       const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
 
@@ -255,7 +255,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
           <Heart className={`mr-2 h-5 w-5 ${isFavorited ? 'text-red-500 fill-red-500' : ''}`} />
           {isFavorited ? 'Favorited' : 'Add to Favorites'}
         </Button>
-        {typeof navigator !== 'undefined' && ( // Show button if on client-side
+        {typeof navigator !== 'undefined' && ( 
             <Button
                 variant="outline"
                 onClick={handleShareRecipe}
