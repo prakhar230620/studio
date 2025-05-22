@@ -5,7 +5,7 @@ import { Navbar } from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Recipe Ready',
-  description: 'Interactive shopping list builder for food recipes.',
+  description: 'AI-powered recipe generation and interactive culinary assistant.',
   manifest: '/manifest.json', // Link to manifest
 };
 
@@ -29,14 +29,18 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#db2777" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#16141f" media="(prefers-color-scheme: dark)" />
+        
+        {/* Favicon links */}
+        <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" sizes="any" />
         {/* 
-          For actual app icons, you would generate them and place them in public/icons/
-          and then link them here, e.g.:
-          <link rel="apple-touch-icon" href="/icons/touch-icon-iphone.png" />
-          <link rel="apple-touch-icon" sizes="152x152" href="/icons/touch-icon-ipad.png" />
-          <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
-          <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+          It's recommended to generate PNG versions of your icon for broader compatibility,
+          especially for favicons and Apple touch icons.
+          e.g., <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
+                <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
         */}
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        {/* You should generate an apple-touch-icon.png (e.g., 180x180) from your SVG */}
+        
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <Providers>

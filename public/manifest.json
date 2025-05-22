@@ -1,23 +1,30 @@
 {
   "name": "Recipe Ready",
-  "short_name": "RecipeApp",
-  "description": "Generate and manage your favorite recipes.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#db2777", 
+  "short_name": "RecipeReady",
+  "description": "AI-powered recipe generation and interactive culinary assistant.",
   "icons": [
     {
-      "src": "https://placehold.co/192x192.png",
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://placehold.co/512x512.png",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "theme_color": "#E63980",
+  "background_color": "#16141f",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
 }

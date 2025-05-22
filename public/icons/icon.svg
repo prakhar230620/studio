@@ -1,0 +1,8 @@
+<svg width="512" height="512" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="60" height="60" rx="12" fill="hsl(260, 25%, 10%)"/>
+  <path d="M20 12C20 10.8954 20.8954 10 22 10H38C39.1046 10 40 10.8954 40 12V28C40 29.1046 39.1046 30 38 30H22C20.8954 30 20 29.1046 20 28V12Z" fill="hsl(340, 85%, 55%)"/>
+  <path d="M30 30V50" stroke="hsl(340, 85%, 55%)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M23.5 10V18" stroke="hsl(260, 25%, 10%)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 10V18" stroke="hsl(260, 25%, 10%)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M36.5 10V18" stroke="hsl(260, 25%, 10%)" stroke-width="3" stroke-linecap="round"/>
+</svg>
