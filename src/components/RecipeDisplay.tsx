@@ -71,11 +71,11 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
   };
 
   const handleShareRecipe = async () => {
-    if (!recipeCardRef.current || typeof navigator === 'undefined' || !navigator.share) {
+    if (!recipeCardRef.current || typeof navigator === 'undefined') {
       toast({
         variant: "destructive",
-        title: "Sharing Not Supported",
-        description: "Your browser does not support this sharing feature.",
+        title: "Action Not Available",
+        description: "This feature is only available in a browser environment.",
       });
       return;
     }
@@ -89,32 +89,33 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
     try {
       const elementToCapture = recipeCardRef.current;
       
-      // Temporarily apply styles for PDF generation
       const originalColors = new Map<HTMLElement, string>();
-      const elementsToStyle = elementToCapture.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, p, span, li, div, label, input');
+      const elementsToStyle = elementToCapture.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, p, span, li, div, label, input, button'); // Added button
       elementsToStyle.forEach(el => {
         originalColors.set(el, el.style.color);
-        el.style.color = 'black'; // Force text to black
+        el.style.color = 'black'; 
       });
       const originalCardBg = elementToCapture.style.backgroundColor;
-      elementToCapture.style.backgroundColor = 'white'; // Force card background to white
+      elementToCapture.style.backgroundColor = 'white'; 
 
       const canvas = await html2canvas(elementToCapture, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff', // Ensure canvas background is white
+        backgroundColor: '#ffffff', 
         onclone: (document) => {
             const imageElement = document.querySelector('.recipe-image-for-pdf') as HTMLImageElement;
             if (imageElement) {
-                // For data URIs, this might not be needed, but good practice for external URLs.
-                // If image is not loaded, html2canvas might capture an empty space.
-                // `priority` prop on next/image helps.
+                //
+            }
+            // Hide share/favorite buttons during PDF generation in cloned document
+            const footerActions = document.querySelector('.recipe-display-card-footer');
+            if (footerActions) {
+                (footerActions as HTMLElement).style.display = 'none';
             }
         }
       });
 
-      // Restore original styles
       elementsToStyle.forEach(el => {
         if (originalColors.has(el)) {
           el.style.color = originalColors.get(el) || '';
@@ -134,7 +135,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
       const pdfFileName = `${recipe.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'recipe'}.pdf`;
       const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
 
-      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         await navigator.share({
           files: [pdfFile],
           title: recipe.title,
@@ -145,14 +146,13 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
           description: "The recipe PDF has been shared.",
         });
       } else {
-         // Fallback: offer a download link
         const link = document.createElement('a');
         link.href = URL.createObjectURL(pdfFile);
         link.download = pdfFile.name;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(link.href); // Clean up
+        URL.revokeObjectURL(link.href); 
         toast({
             title: "PDF Downloaded",
             description: "Recipe PDF has been downloaded as direct sharing of files is not fully supported."
@@ -187,7 +187,7 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
               layout="fill"
               objectFit="cover"
               className="transform hover:scale-105 transition-transform duration-300 ease-in-out recipe-image-for-pdf"
-              priority // Helps ensure image is loaded for html2canvas
+              priority 
             />
           </div>
         )}
@@ -226,11 +226,12 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
               return (
                 <li key={ing.id || index} className="text-base flex items-center">
                   {emoji && <span role="img" aria-label={`${ing.name} emoji`} className="mr-2 w-5 text-center text-lg">{emoji}</span>}
-                  {!emoji && <span className="mr-2 w-5 text-center"></span>}
+                  {!emoji && <span className="mr-2 w-5 text-center"></span>} {/* Alignment placeholder */}
                   <span>
                     {ing.quantity > 0 ? `${ing.quantity} ` : ""}
-                    {ing.unit ? `${ing.unit} ` : ""}
+                    {ing.unit && ing.unit !== "special" ? `${ing.unit} ` : ""} {/* Hide unit if special and quantity is 0 */}
                     {ing.name}
+                    {ing.unit === "special" && ing.quantity === 0 && ` (to taste/as needed)`} {/* Clarify special units */}
                   </span>
                 </li>
               );
@@ -249,12 +250,12 @@ export function RecipeDisplay({ recipe, onToggleFavorite }: RecipeDisplayProps) 
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-4 p-6 border-t">
+      <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-4 p-6 border-t recipe-display-card-footer">
         <Button variant={isFavorited ? "secondary" : "outline"} onClick={handleToggleFavorite} className="w-full sm:w-auto text-base py-3">
           <Heart className={`mr-2 h-5 w-5 ${isFavorited ? 'text-red-500 fill-red-500' : ''}`} />
           {isFavorited ? 'Favorited' : 'Add to Favorites'}
         </Button>
-        {typeof navigator !== 'undefined' && navigator.share && (
+        {typeof navigator !== 'undefined' && ( // Show button if on client-side
             <Button
                 variant="outline"
                 onClick={handleShareRecipe}
