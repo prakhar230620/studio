@@ -14,7 +14,7 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  output: 'export', // Added for static export, compatible with Capacitor
+  // output: 'export', // REMOVED: Not needed for Vercel deployment with server-side features
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -22,10 +22,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    // When using `next export`, next/image needs to be unoptimized
-    // or use a custom loader if not deploying to a platform that supports it.
-    // For Capacitor's local serving, unoptimized is often the simplest.
-    unoptimized: true,
+    // unoptimized: true, // REMOVED: Vercel handles Next.js image optimization
     remotePatterns: [
       {
         protocol: 'https',
