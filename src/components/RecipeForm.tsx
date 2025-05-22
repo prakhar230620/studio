@@ -140,6 +140,24 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
   const watchedCookTimeOption = form.watch("cookTimeOption");
   const watchedServings = form.watch("servings");
 
+  // Watch for changes in preference arrays/values to update badges
+  const watchedDietaryPreferences = form.watch("dietaryPreferences");
+  const watchedCuisineType = form.watch("cuisineType");
+  const watchedSpiceLevel = form.watch("spiceLevel");
+  const watchedCookingMethod = form.watch("cookingMethod");
+  const watchedMealType = form.watch("mealType");
+  const watchedCookTime = form.watch("cookTimeOption");
+  const watchedHealthOptions = form.watch("healthOptions");
+
+  const dietaryCount = watchedDietaryPreferences?.length || 0;
+  const cuisineCount = watchedCuisineType?.length || 0;
+  const spiceLevelCount = watchedSpiceLevel !== "any" ? 1 : 0;
+  const cookingMethodCount = watchedCookingMethod?.length || 0;
+  const mealTypeCount = watchedMealType?.length || 0;
+  const cookTimeCount = watchedCookTime !== "any" ? 1 : 0;
+  const healthOptionsCount = watchedHealthOptions?.length || 0;
+
+
   const handleSubmit: SubmitHandler<RecipeFormValues> = async (data) => {
     if (data.cookTimeOption !== "customTime") {
       data.customCookTime = undefined;
@@ -205,8 +223,17 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     />
   );
 
+  const renderBadge = (count: number) => {
+    if (count === 0) return null;
+    return (
+      <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] w-4 h-4 flex items-center justify-center rounded-full leading-none">
+        {count}
+      </span>
+    );
+  };
+
   const preferenceCategories = [
-    { id: "servings", label: "Servings", icon: Users, content: (
+    { id: "servings", label: "Servings", icon: Users, count: 0, content: ( // Servings doesn't have a list of options to count. Badge logic TBD if needed.
       <FormField
         control={form.control}
         name="servings"
@@ -275,9 +302,9 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
         )}
       />
     )},
-    { id: "dietary", label: "Dietary", icon: Salad, content: renderCheckboxGroup("dietaryPreferences" as any, dietaryOptions) },
-    { id: "cuisine", label: "Cuisine", icon: Globe2, content: renderCheckboxGroup("cuisineType" as any, cuisineOptions) },
-    { id: "spice", label: "Spice Level", icon: Flame, content: (
+    { id: "dietary", label: "Dietary", icon: Salad, count: dietaryCount, content: renderCheckboxGroup("dietaryPreferences" as any, dietaryOptions) },
+    { id: "cuisine", label: "Cuisine", icon: Globe2, count: cuisineCount, content: renderCheckboxGroup("cuisineType" as any, cuisineOptions) },
+    { id: "spice", label: "Spice Level", icon: Flame, count: spiceLevelCount, content: (
       <FormField
         control={form.control}
         name="spiceLevel"
@@ -311,9 +338,9 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
         )}
       />
     )},
-    { id: "cookMethod", label: "Cooking Method", icon: CookingPot, content: renderCheckboxGroup("cookingMethod" as any, cookingMethodOptions) },
-    { id: "mealType", label: "Meal Type", icon: Sandwich, content: renderCheckboxGroup("mealType" as any, mealTypeOptions) },
-    { id: "cookTime", label: "Cook Time", icon: Clock, content: (
+    { id: "cookMethod", label: "Cooking Method", icon: CookingPot, count: cookingMethodCount, content: renderCheckboxGroup("cookingMethod" as any, cookingMethodOptions) },
+    { id: "mealType", label: "Meal Type", icon: Sandwich, count: mealTypeCount, content: renderCheckboxGroup("mealType" as any, mealTypeOptions) },
+    { id: "cookTime", label: "Cook Time", icon: Clock, count: cookTimeCount, content: (
       <>
         <FormField
           control={form.control}
@@ -364,7 +391,7 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
         )}
       </>
     )},
-    { id: "health", label: "Health/Flavor", icon: HeartPulse, content: renderCheckboxGroup("healthOptions" as any, healthSpecificOptions) },
+    { id: "health", label: "Health/Flavor", icon: HeartPulse, count: healthOptionsCount, content: renderCheckboxGroup("healthOptions" as any, healthSpecificOptions) },
   ];
 
   return (
@@ -416,11 +443,12 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
                     className="min-w-36 w-36 sm:w-40 md:w-44 border rounded-lg shadow-sm data-[state=open]:ring-1 data-[state=open]:ring-primary hover:shadow-md transition-shadow bg-card"
                   >
                     <AccordionItem value={category.id} className="border-0">
-                      <AccordionTrigger className="p-3 text-sm font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 w-full data-[state=open]:border-b">
+                      <AccordionTrigger className="p-3 text-sm font-medium hover:bg-muted/50 [&[data-state=open]]:bg-muted/30 w-full data-[state=open]:border-b relative">
                         <div className="flex flex-col items-center gap-1 w-full">
                           <IconComponent className="text-accent h-7 w-7" />
                           <span>{category.label}</span>
                         </div>
+                        {category.id !== "servings" && renderBadge(category.count)} 
                       </AccordionTrigger>
                       <AccordionContent className="p-3 bg-background/50 max-h-60 overflow-y-auto">
                         {category.content}
@@ -452,6 +480,4 @@ export function RecipeForm({ isLoading, onSubmitPrompt, error }: RecipeFormProps
     </Card>
   );
 }
-
-
     
