@@ -49,7 +49,7 @@ export function Navbar() {
           </nav>
           <LanguageSelector />
           {mounted && (
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
+            <Button variant="ghost\" size="icon\" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
@@ -58,7 +58,7 @@ export function Navbar() {
         <div className="md:hidden flex items-center gap-2">
           <LanguageSelector />
           {mounted && (
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
+            <Button variant="ghost\" size="icon\" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
