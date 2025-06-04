@@ -1,0 +1,62 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "favorites": "Favorites",
+    "toggleTheme": "Toggle theme"
+  },
+  "home": {
+    "title": "Create Your Perfect Recipe",
+    "description": "Tell us your preferences, and let our AI craft a unique recipe for you!",
+    "mainPrompt": {
+      "label": "Your Core Recipe Idea",
+      "placeholder": "e.g., 'a quick pasta dish with chicken and spinach', 'a hearty lentil soup', or 'something sweet with berries'",
+      "description": "Describe the main dish or ingredients you have in mind."
+    },
+    "refineDetails": "Optionally, refine with details below:",
+    "createButton": "Create My Recipe!",
+    "creatingButton": "Crafting Your Recipe..."
+  },
+  "recipe": {
+    "servings": "Servings",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "sharePdf": "Share Recipe as PDF",
+    "createAnother": "Create Another Recipe"
+  },
+  "favorites": {
+    "title": "My Favorite Recipes",
+    "noFavorites": {
+      "title": "No Favorites Yet",
+      "description": "Start exploring and add some recipes you love!",
+      "action": "Find Recipes"
+    },
+    "clearAll": {
+      "button": "Clear All Favorites",
+      "confirmTitle": "Are you sure?",
+      "confirmDescription": "This action will remove all your favorite recipes. This cannot be done.",
+      "success": "All your favorite recipes have been removed."
+    }
+  },
+  "preferences": {
+    "servings": "Servings",
+    "dietary": "Dietary",
+    "cuisine": "Cuisine",
+    "spiceLevel": "Spice Level",
+    "cookingMethod": "Cooking Method",
+    "mealType": "Meal Type",
+    "cookTime": "Cook Time",
+    "health": "Health/Flavor"
+  }
+}

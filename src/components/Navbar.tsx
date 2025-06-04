@@ -1,27 +1,28 @@
-
 "use client";
 
 import Link from "next/link";
-import { Utensils, Heart, Menu, Sun, Moon } from "lucide-react"; // Removed ShoppingCart
+import { Utensils, Heart, Menu, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"; // Added SheetTitle
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-
-const navItems = [
-  { href: "/", label: "Home", icon: <Utensils className="h-5 w-5" /> },
-  { href: "/favorites", label: "Favorites", icon: <Heart className="h-5 w-5" /> },
-  // { href: "/shopping-list", label: "Shopping List", icon: <ShoppingCart className="h-5 w-5" /> }, // Removed Shopping List
-];
+import { useTranslations } from 'next-intl';
+import { LanguageSelector } from "./LanguageSelector";
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const t = useTranslations();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const navItems = [
+    { href: "/", label: t('nav.home'), icon: <Utensils className="h-5 w-5" /> },
+    { href: "/favorites", label: t('nav.favorites'), icon: <Heart className="h-5 w-5" /> },
+  ];
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
@@ -35,8 +36,7 @@ export function Navbar() {
           <span className="text-xl font-bold tracking-tight">Recipe Ready</span>
         </Link>
 
-        {/* Desktop Navigation & Theme Toggle */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-4">
           <nav className="flex items-center gap-2">
             {navItems.map((item) => (
               <Button key={item.label} variant="ghost" asChild>
@@ -47,17 +47,18 @@ export function Navbar() {
               </Button>
             ))}
           </nav>
+          <LanguageSelector />
           {mounted && (
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
         </div>
 
-        {/* Mobile Navigation */}
         <div className="md:hidden flex items-center gap-2">
-           {mounted && (
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+          <LanguageSelector />
+          {mounted && (
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
@@ -69,7 +70,7 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] p-0">
-              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle> {/* Added sr-only SheetTitle */}
+              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
               <div className="flex flex-col h-full">
                 <div className="p-6 border-b">
                   <Link href="/" className="flex items-center gap-2 text-primary" onClick={() => setIsMobileMenuOpen(false)}>
