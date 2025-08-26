@@ -1,0 +1,62 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar"
+  },
+  "nav": {
+    "home": "Inicio",
+    "favorites": "Favoritos",
+    "toggleTheme": "Cambiar tema"
+  },
+  "home": {
+    "title": "Crea Tu Receta Perfecta",
+    "description": "¡Cuéntanos tus preferencias y deja que nuestra IA cree una receta única para ti!",
+    "mainPrompt": {
+      "label": "Tu Idea Principal de Receta",
+      "placeholder": "ej., 'un plato rápido de pasta con pollo y espinacas', 'una sopa sustanciosa de lentejas', o 'algo dulce con bayas'",
+      "description": "Describe el plato principal o los ingredientes que tienes en mente."
+    },
+    "refineDetails": "Opcionalmente, refina con detalles a continuación:",
+    "createButton": "¡Crear Mi Receta!",
+    "creatingButton": "Creando Tu Receta..."
+  },
+  "recipe": {
+    "servings": "Porciones",
+    "ingredients": "Ingredientes",
+    "instructions": "Instrucciones",
+    "addToFavorites": "Añadir a Favoritos",
+    "removeFromFavorites": "Quitar de Favoritos",
+    "sharePdf": "Compartir Receta como PDF",
+    "createAnother": "Crear Otra Receta"
+  },
+  "favorites": {
+    "title": "Mis Recetas Favoritas",
+    "noFavorites": {
+      "title": "Aún No Hay Favoritos",
+      "description": "¡Empieza a explorar y añade las recetas que te gusten!",
+      "action": "Buscar Recetas"
+    },
+    "clearAll": {
+      "button": "Borrar Todos los Favoritos",
+      "confirmTitle": "¿Estás seguro?",
+      "confirmDescription": "Esta acción eliminará todas tus recetas favoritas. No se puede deshacer.",
+      "success": "Se han eliminado todas tus recetas favoritas."
+    }
+  },
+  "preferences": {
+    "servings": "Porciones",
+    "dietary": "Dietético",
+    "cuisine": "Cocina",
+    "spiceLevel": "Nivel de Picante",
+    "cookingMethod": "Método de Cocción",
+    "mealType": "Tipo de Comida",
+    "cookTime": "Tiempo de Cocción",
+    "health": "Salud/Sabor"
+  }
+}
