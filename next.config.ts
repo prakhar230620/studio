@@ -7,14 +7,12 @@ const withPWA = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development', // Disable PWA in development
   register: true,
-  skipWaiting: true, // Automatically activate new service worker
   cacheOnFrontEndNav: true, // Cache pages navigated to on the client side
   aggressiveFrontEndNavCaching: true, // More aggressive caching for client-side navigations
   reloadOnOnline: true, // Reload PWA when back online
 });
 
 const nextConfig: NextConfig = {
-  // output: 'export', // REMOVED: Not needed for Vercel deployment with server-side features
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -22,7 +20,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    // unoptimized: true, // REMOVED: Vercel handles Next.js image optimization
     remotePatterns: [
       {
         protocol: 'https',
@@ -32,6 +29,28 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Fix for Genkit AI dependencies
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+    };
+    
+    // Ignore problematic modules during client-side build
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@opentelemetry/sdk-node': false,
+        'handlebars': false,
+      };
+    }
+    
+    return config;
+  },
+  serverExternalPackages: ['@genkit-ai/core', 'genkit'],
 };
 
 export default withPWA(nextConfig);

@@ -1,12 +1,10 @@
-import createMiddleware from 'next-intl/middleware';
-import {locales} from './src/i18n';
- 
-export default createMiddleware({
-  locales,
-  defaultLocale: 'en',
-  localePrefix: 'always'
-});
- 
+import { NextResponse } from 'next/server';
+
+// No-op middleware: we no longer use locale routing or next-intl.
+export function middleware() {
+  return NextResponse.next();
+}
+
 export const config = {
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };

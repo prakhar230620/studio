@@ -63,7 +63,6 @@ export default function HomePage() {
       }
     }
     if (data.healthOptions && data.healthOptions.length > 0) {
-      // If "spicy" was a health option and is now covered by spiceLevel, ensure it's not duplicated or conflicting
       const healthPromptParts = data.healthOptions.filter(opt => !(data.spiceLevel !== "any" && opt.toLowerCase().includes("spicy")));
       if (healthPromptParts.length > 0) {
         detailedPrompt += `\nHealth and flavor profile: ${healthPromptParts.join(', ')}. For example, if 'low-sugar' is chosen, minimize added sugars.`;

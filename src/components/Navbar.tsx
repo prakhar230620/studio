@@ -6,22 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { useTranslations } from 'next-intl';
-import { LanguageSelector } from "./LanguageSelector";
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const t = useTranslations();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const navItems = [
-    { href: "/", label: t('nav.home'), icon: <Utensils className="h-5 w-5" /> },
-    { href: "/favorites", label: t('nav.favorites'), icon: <Heart className="h-5 w-5" /> },
+    { href: "/", label: "Home", icon: <Utensils className="h-5 w-5" /> },
+    { href: "/favorites", label: "Favorites", icon: <Heart className="h-5 w-5" /> },
   ];
 
   const toggleTheme = () => {
@@ -47,18 +44,16 @@ export function Navbar() {
               </Button>
             ))}
           </nav>
-          <LanguageSelector />
           {mounted && (
-            <Button variant="ghost\" size="icon\" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
         </div>
 
         <div className="md:hidden flex items-center gap-2">
-          <LanguageSelector />
           {mounted && (
-            <Button variant="ghost\" size="icon\" onClick={toggleTheme} aria-label={t('nav.toggleTheme')}>
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
