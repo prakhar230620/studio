@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false, // Recommended for modern web apps
   server: {
     // Replace with your Vercel deployment URL after deploying your Next.js app
-    url: 'YOUR_DEPLOYED_NEXTJS_APP_URL', 
+    url: 'https://recipeready-e9qxferr5-commanders-projects-afe5d523.vercel.app/', 
     cleartext: true, // Set to true if your URL is HTTP for local testing (not recommended for production)
                      // For Vercel (HTTPS), this can often be false or removed, but true is safer for initial setup.
     // allowNavigation: ['YOUR_DEPLOYED_NEXTJS_APP_URL'] // Optional: Restrict navigation to only your domain
